@@ -8,9 +8,11 @@ public interface IRowReader<TTargetObject>
 {
     IRowReader<TTargetObject> ForProperty<TProperty>(Expression<Func<TTargetObject, TProperty>> expression,
         string column,
-        int index = -1,
+        int index = 0,
         Func<string, TProperty> convertor = null,
         Action<TTargetObject> extraAction = null);
+
+    IRowReader<TTargetObject> Extra(Action<TTargetObject, IRowReader> action);
 
     TTargetObject Read(IRowReader rowReader);
 }

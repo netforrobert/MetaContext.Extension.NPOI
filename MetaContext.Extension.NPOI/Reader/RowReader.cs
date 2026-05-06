@@ -4,6 +4,7 @@ using System.Linq;
 using MetaContext.Extension.NPOI.ColumIndex;
 
 using NPOI.POIFS.Crypt;
+using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
 
 namespace MetaContext.Extension.NPOI.Reader;
@@ -19,13 +20,13 @@ internal class RowReader : IRowReader
         _colIndexs = colIndexs;
     }
 
-    public string Read(string column, int index = -1)
+    public string Read(string column, int index)
     {
-        string key = column;
-        if (index >= 0)
-            key = $"{column}_{index}";
-
+        string key = $"{column}_{index}";
         var colIndex = _colIndexs[key];
         return _row.GetCell(colIndex.StartIndex)?.ToString();
     }
+
+    public string Read(int index)
+        => _row.GetCell(index)?.ToString();
 }

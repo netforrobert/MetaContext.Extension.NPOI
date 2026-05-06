@@ -15,7 +15,7 @@ public static class NPOIExtension
     public static ISheetWriter UseSheetWriter(this ISheet sheet)
         => new SheetWriter(sheet);
 
-    public static ISheetReader UseSheeReader(this ISheet sheet,
+    public static ISheetReader UseSheetReader(this ISheet sheet,
         Action<IReaderErrorMessageConfig> msgConfigAction = null)
     {
         ReaderErrorMessageProvider provider = new();

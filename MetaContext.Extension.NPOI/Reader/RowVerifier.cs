@@ -4,6 +4,7 @@ using System.Linq;
 
 using MetaContext.Extension.NPOI.ColumIndex;
 
+using NPOI.SS.Formula.PTG;
 using NPOI.SS.UserModel;
 
 namespace MetaContext.Extension.NPOI.Reader;
@@ -12,7 +13,7 @@ public class RowVerifier : IRowVerifier
 {
     private readonly Dictionary<ColKey, List<ColumnVerifier>> _columnVerifiers = new();
     private readonly HashSet<ColKey> _notRequireColKeys = new();
-    private readonly List<RowReaderVerifier> _rowReaderVerifiers = new();
+    private readonly List<RowValidation> _rowValidations = new();
     private readonly ColumnIndices _columnIndices;
     private readonly IReaderErrorMessageProvider _messageProvider;
 
@@ -24,7 +25,7 @@ public class RowVerifier : IRowVerifier
     }
 
     public IRowVerifier NotRequireColumn(string columnm,
-        int index = -1)
+        int index)
     {
         _notRequireColKeys.Add(new(columnm, index));
         return this;
@@ -33,20 +34,13 @@ public class RowVerifier : IRowVerifier
     public IRowVerifier VerifyColumn(string column, 
         Func<string, bool> verifyFunc, 
         Func<string, string> errTextFunc, 
-        int index = -1)
+        int index = 0)
     {
         ColKey colKey = new(column, index);
         if (!_columnVerifiers.ContainsKey(colKey))
             _columnVerifiers[colKey] = new List<ColumnVerifier>();
 
         _columnVerifiers[colKey].Add(new(verifyFunc, errTextFunc));
-        return this;
-    }
-
-    public IRowVerifier VerifyRow(Func<IRowReader, bool> verifyFunc, 
-        Func<IRowReader, string> errTextFunc)
-    {
-        _rowReaderVerifiers.Add(new(verifyFunc, errTextFunc));
         return this;
     }
 
@@ -84,17 +78,25 @@ public class RowVerifier : IRowVerifier
             return new ErrowRowInfo(row.RowNum + 1, errorMessages);
 
         //行验证
-        foreach (var rowReaderVerifier in _rowReaderVerifiers)
+        foreach (var rowValidation in _rowValidations)
         {
-            if (rowReaderVerifier.VerifyFunc(rowReader))
+            if (rowValidation.IsErrorRow(rowReader, out string errMessage))
             {
-                string errmsg = rowReaderVerifier.ErrTextFunc(rowReader);
-                errorMessages.Add(errmsg);
+                errorMessages.Add(errMessage);
                 break;
             }
         }
 
         return new ErrowRowInfo(row.RowNum + 1, errorMessages);
+    }
+
+    public IRowVerifier VerifyRow(Action<IRowValidation> action)
+    {
+        RowValidation validation = new();
+        action(validation);
+        validation.VerifySelf();
+        _rowValidations.Add(validation);
+        return this;
     }
 
     private class ColumnVerifier
@@ -109,19 +111,5 @@ public class RowVerifier : IRowVerifier
         public Func<string, bool> VerifyFunc { get; private set; }
 
         public Func<string, string> ErrTextFunc { get; private set; }
-    }
-
-    private class RowReaderVerifier
-    {
-        public RowReaderVerifier(Func<IRowReader, bool> verifyFunc, 
-            Func<IRowReader, string> errTextFunc)
-        {
-            VerifyFunc = verifyFunc;
-            ErrTextFunc = errTextFunc;
-        }
-
-        public Func<IRowReader, bool> VerifyFunc { get; private set; }
-
-        public Func<IRowReader, string> ErrTextFunc { get; private set; }
     }
 }

@@ -9,6 +9,13 @@ internal class RowReader<TTargetObject> : IRowReader<TTargetObject>
     where TTargetObject : class, new()
 {
     private readonly Dictionary<ColKey, Action<TTargetObject, string>> _setActions = new();
+    private readonly List<Action<TTargetObject, IRowReader>> _extraActions = new();
+
+    public IRowReader<TTargetObject> Extra(Action<TTargetObject, IRowReader> action)
+    {
+        _extraActions.Add(action);
+        return this;
+    }
 
     public IRowReader<TTargetObject> ForProperty<TProperty>(Expression<Func<TTargetObject, TProperty>> expression, 
         string column, 
@@ -16,35 +23,12 @@ internal class RowReader<TTargetObject> : IRowReader<TTargetObject>
         Func<string, TProperty> convertor = null, 
         Action<TTargetObject> extraAction = null)
     {
-        static TProperty PropertyConvertor(string text)
-        {
-            Type type = typeof(TProperty);
-            if (type.IsGenericType
-                && type.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
-                type = type.GetGenericArguments()[0];
-            }
-
-            object tagValue = type switch
-            {
-                Type t when t == typeof(int) => int.Parse(text),
-                Type t when t == typeof(long) => long.Parse(text),
-                Type t when t == typeof(Guid) => Guid.Parse(text),
-                Type t when t == typeof(decimal) => decimal.Parse(text),
-                Type t when t.IsEnum => Enum.Parse(t, text),
-                Type t when t == typeof(DateTime) => DateTime.Parse(text),
-                _ => Convert.ChangeType(text, type)
-            };
-
-            return (TProperty)tagValue;
-        }
-
         if (expression.Body is not MemberExpression memberExpression
             || memberExpression.Member is not PropertyInfo property
             || property.GetSetMethod() == null)
             throw new NotSupportedException($"列[{column}]的表达式{expression}不包含设置器");
 
-        convertor ??= PropertyConvertor;
+        convertor ??= x => x.ParseToValue<TProperty>();
         void setAction(TTargetObject x, string y)
         {
             var value = convertor(y);
@@ -63,6 +47,9 @@ internal class RowReader<TTargetObject> : IRowReader<TTargetObject>
             string value = rowReader.Read(item.Key.Column, item.Key.Index);
             item.Value(targetObject, value);
         }
+
+        foreach (var item in _extraActions)
+            item(targetObject, rowReader);
 
         return targetObject;
     }

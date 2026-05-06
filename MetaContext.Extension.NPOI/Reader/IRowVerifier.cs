@@ -6,14 +6,14 @@ namespace MetaContext.Extension.NPOI.Reader;
 
 public interface IRowVerifier
 {
-    IRowVerifier NotRequireColumn(string columnm, int index = -1);
+    IRowVerifier NotRequireColumn(string columnm, int index = 0);
 
     IRowVerifier VerifyColumn(string column,
         Func<string, bool> verifyFunc, 
         Func<string, string> errTextFunc,
-        int index = -1);
+        int index = 0);
 
-    IRowVerifier VerifyRow(Func<IRowReader, bool> verifyFunc, Func<IRowReader, string> errTextFunc);
+    IRowVerifier VerifyRow(Action<IRowValidation> action);
 
     ErrowRowInfo RunVerify(IRow row);
 }

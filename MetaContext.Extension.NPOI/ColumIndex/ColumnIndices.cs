@@ -8,7 +8,6 @@ namespace MetaContext.Extension.NPOI.ColumIndex;
 public class ColumnIndices : IColumnIndices
 {
     private readonly Dictionary<string, ColumnIndex> _colIndexs = new();
-    private readonly Dictionary<string, int> _relativeIndexs = new();
 
     public ColumnIndices(string[] columns,
         int startIndex = 0)
@@ -80,21 +79,8 @@ public class ColumnIndices : IColumnIndices
 
     public ColumnIndex this[string key] => _colIndexs[key];
 
-    public ColumnIndex GetColIndex(string colName, int relativeIndex = -1)
+    public ColumnIndex GetColIndex(string colName, int relativeIndex)
     {
-        if (relativeIndex < 0)
-        {
-            if (!_relativeIndexs.ContainsKey(colName))
-                _relativeIndexs[colName] = 0;
-            else
-            {
-                var valIndex = _relativeIndexs[colName];
-                _relativeIndexs[colName] = valIndex + 1;
-            }
-
-            relativeIndex = _relativeIndexs[colName];
-        }
-
         string key = $"{colName}_{relativeIndex}";
         if (_colIndexs.ContainsKey(key))
             return _colIndexs[key];
