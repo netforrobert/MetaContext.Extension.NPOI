@@ -7,18 +7,18 @@ using NPOI.SS.Util;
 
 namespace MetaContext.Extension.NPOI.Writer;
 
-internal class RowWriter : IRowWriter
+internal class RowSetter : IRowSetter
 {
     private readonly IRow _row;
     private readonly ColumnIndices _colIndexs;
 
-    public RowWriter(IRow row, ColumnIndices colIndexs)
+    public RowSetter(IRow row, ColumnIndices colIndexs)
     {
         _row = row;
         _colIndexs = colIndexs;
     }
 
-    public IRowWriter Writer<TargetValue>(string columnName, TargetValue value, int index)
+    public IRowSetter Set<TargetValue>(string columnName, TargetValue value, int index)
     {
         var colIndex = _colIndexs.GetColIndex(columnName, index) 
             ?? throw new InvalidOperationException($"列名 '{columnName}' 不存在");

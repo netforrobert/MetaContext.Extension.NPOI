@@ -43,19 +43,21 @@ internal class SheetReader : ISheetReader
 
     public ReadResult<TTargetObject> Read<TTargetObject>(Action<IRowReader<TTargetObject>> readerAction,
         int startRowIndex = 1, 
-        int startColIndex = 0)
+        int startColIndex = 0,
+        Action<ITargetObjectVerifier<TTargetObject>> objectVerify = null)
         where TTargetObject : class, new()
     {
         IRowReader<TTargetObject> rowTReader = new RowReader<TTargetObject>();
         readerAction(rowTReader);
 
         TTargetObject ObjectFactory(IRowReader rowReader) => rowTReader.Read(rowReader);
-        return Read(ObjectFactory, startRowIndex, startColIndex);
+        return Read(ObjectFactory, startRowIndex, startColIndex, objectVerify);
     }
 
     public ReadResult<TTargetObject> Read<TTargetObject>(Func<IRowReader, TTargetObject> targetFactory,
         int startRowIndex = 1, 
-        int startColIndex = 0)
+        int startColIndex = 0,
+        Action<ITargetObjectVerifier<TTargetObject>> objectVerify = null)
     {
         var enumerator = _headerVerifiers.GetEnumerator();
         //处理表头校验
@@ -86,6 +88,8 @@ internal class SheetReader : ISheetReader
         List<TTargetObject> targetObjects = new();
         int processedCount = 0;
         int successedCount = 0;
+        TargetObjectVerifier<TTargetObject> objectVerifier = new();
+        objectVerify?.Invoke(objectVerifier);
         for (int rowIndex = startRowIndex; rowIndex <= _sheet.LastRowNum; rowIndex++)
         {
             var row = _sheet.GetRow(rowIndex);
@@ -103,6 +107,13 @@ internal class SheetReader : ISheetReader
                 continue;
             }
             TTargetObject targetObject = targetFactory(new RowReader(row, LastHeader));
+            //校验对象
+            if (objectVerifier.TryVerify(targetObject, out string message))
+            {
+                errowRowInfos.Add(new(rowIndex + 1, message));
+                continue;
+            }
+
             targetObjects.Add(targetObject);
             successedCount++;
         }

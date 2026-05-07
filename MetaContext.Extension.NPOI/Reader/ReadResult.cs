@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace MetaContext.Extension.NPOI.Reader;
@@ -10,10 +11,10 @@ public class ReadResult<TTargetObject>
         int successedCount, 
         IEnumerable<ErrowRowInfo> errowRows)
     {
-        Data = data;
+        Data = data ?? Array.Empty<TTargetObject>();
         ProcessedCount = processedCount;
         SuccessedCount = successedCount;
-        ErrowRows = errowRows?.ToArray();
+        ErrowRows = errowRows?.ToArray() ?? Array.Empty<ErrowRowInfo>();
     }
 
     public ReadResult(ErrowRowInfo errowRowInfo)

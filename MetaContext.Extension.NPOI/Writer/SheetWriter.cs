@@ -25,9 +25,9 @@ internal class SheetWriter : ISheetWriter
         ColumnIndices indices = new(headers, colStartIndex);
         _headers[rowIndex] = indices;
         var row = _sheet.CreateRow(rowIndex);
-        IRowWriter rowWriter = new RowWriter(row, indices);
+        IRowSetter rowWriter = new RowSetter(row, indices);
         foreach (var colIndex in indices.Indices)
-            rowWriter.Writer(colIndex.Name, colIndex.Name);
+            rowWriter.Set(colIndex.Name, colIndex.Name);
 
         ///表头样式
         var workbook = _sheet.Workbook;
@@ -60,7 +60,7 @@ internal class SheetWriter : ISheetWriter
     }
 
     public ISheetWriter Write<TSourceObject>(IEnumerable<TSourceObject> sourceObjects, 
-        Action<IDataWriter<TSourceObject>> writerAction, 
+        Action<IDataSetter<TSourceObject>> writerAction, 
         int startRowIndex)
     {
         var lastHeader = _headers.OrderByDescending(p => p.Key)
@@ -75,7 +75,7 @@ internal class SheetWriter : ISheetWriter
         foreach (var sourceObject in sourceObjects)
         {
             var dataRow = _sheet.GetRow(rowIndex) ?? _sheet.CreateRow(rowIndex);
-            IDataWriter<TSourceObject> dataWriter = new DataWriter<TSourceObject>(lastHeader,
+            IDataSetter<TSourceObject> dataWriter = new DataSetter<TSourceObject>(lastHeader,
                 dataRow,
                 getterProvider,
                 sourceObject);

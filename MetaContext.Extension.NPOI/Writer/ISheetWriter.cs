@@ -10,7 +10,7 @@ public interface ISheetWriter
         int rowIndex = 0);
 
     ISheetWriter Write<TSourceObject>(IEnumerable<TSourceObject> sourceObjects,
-        Action<IDataWriter<TSourceObject>> writerAction,
+        Action<IDataSetter<TSourceObject>> writerAction,
         int startRowIndex = -1);
 
     ISheetWriter UseDefaultAutoWidthSize(int columnsCount = 0);
