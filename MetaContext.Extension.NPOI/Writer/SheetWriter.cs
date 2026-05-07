@@ -27,7 +27,7 @@ internal class SheetWriter : ISheetWriter
         var row = _sheet.CreateRow(rowIndex);
         IRowSetter rowWriter = new RowSetter(row, indices);
         foreach (var colIndex in indices.Indices)
-            rowWriter.Set(colIndex.Name, colIndex.Name);
+            rowWriter.Set(colIndex.Name, colIndex.Name, colIndex.RelativeIndex);
 
         ///表头样式
         var workbook = _sheet.Workbook;
