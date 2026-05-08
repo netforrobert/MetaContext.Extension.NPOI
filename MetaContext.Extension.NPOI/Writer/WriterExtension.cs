@@ -6,8 +6,10 @@ using System.Text;
 
 using MetaContext.Extension.NPOI.ColumIndex;
 
+using NPOI.HSSF.Util;
 using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
+using NPOI.SS.Util;
 
 namespace MetaContext.Extension.NPOI.Writer;
 
@@ -73,6 +75,21 @@ public static class WriterExtension
         style.LeftBorderColor = IndexedColors.Black.Index;
         style.RightBorderColor = IndexedColors.Black.Index;
         style.TopBorderColor = IndexedColors.Black.Index;
+    }
+
+    public static void SetNoramlBorder(this CellRangeAddress region,
+        ICellStyle style,
+        ISheet sheet)
+    {
+        RegionUtil.SetBorderTop(style.BorderTop, region, sheet);
+        RegionUtil.SetBorderBottom(style.BorderBottom, region, sheet);
+        RegionUtil.SetBorderLeft(style.BorderLeft, region, sheet);
+        RegionUtil.SetBorderRight(style.BorderRight, region, sheet);
+
+        RegionUtil.SetTopBorderColor(style.TopBorderColor, region, sheet);
+        RegionUtil.SetBottomBorderColor(style.BottomBorderColor, region, sheet);
+        RegionUtil.SetLeftBorderColor(style.LeftBorderColor, region, sheet);
+        RegionUtil.SetRightBorderColor(style.RightBorderColor, region, sheet);
     }
 
     public static BytesContent ToBytesContent(this IWorkbook workbook,

@@ -12,48 +12,27 @@ namespace MetaContext.Extension.NPOI.Writer;
 
 internal class SheetWriter : ISheetWriter
 {
-    private readonly Dictionary<int, ColumnIndices> _headers = new();
+    private readonly List<ISheetHeader> _sheetHeaders = new();
     private readonly ISheet _sheet;
 
     public SheetWriter(ISheet sheet)
         => _sheet = sheet;
 
-    public ISheetWriter CreateHeader(string[] headers,
+    public ISheetWriter CreateHeader(Action<ISheetHeader> action,
         int colStartIndex = 0,
-        int rowIndex = 0)
+        int rowIndex = 0,
+        int rows = 1)
     {
-        ColumnIndices indices = new(headers, colStartIndex);
-        _headers[rowIndex] = indices;
-        var row = _sheet.CreateRow(rowIndex);
-        IRowSetter rowWriter = new RowSetter(row, indices);
-        foreach (var colIndex in indices.Indices)
-            rowWriter.Set(colIndex.Name, colIndex.Name, colIndex.RelativeIndex);
-
-        ///表头样式
-        var workbook = _sheet.Workbook;
-        ICellStyle headerStyle = workbook.CreateCellStyle();
-        IFont font = workbook.CreateFont();
-        font.IsBold = true;
-        headerStyle.SetFont(font);
-        headerStyle.Alignment = HorizontalAlignment.Center;
-        headerStyle.SetNormalBorder();
-        foreach (var colIndex in indices.Indices)
-        {
-            var cell = row.GetCell(colIndex.StartIndex) ?? row.CreateCell(colIndex.EndIndex);
-            cell.CellStyle = headerStyle;
-        }
-
+        var header = new SheetHeader(_sheet, rowIndex, rows, colStartIndex);
+        action(header);
+        _sheetHeaders.Add(header);
         return this;
     }
 
     public ISheetWriter UseDefaultAutoWidthSize(int columnsCount)
     {
-        if (columnsCount == 0)
-        {
-            var lastHeader = _headers.OrderByDescending(p => p.Key)
-                .Select(p => p.Value).FirstOrDefault();
-            columnsCount = lastHeader?.ColumnsCount ?? 0;
-        }
+        if (columnsCount == 0 && _sheetHeaders.Count > 0)
+            columnsCount = _sheetHeaders.Select(p => p.Cols).Max();
 
         _sheet.UseDefaultAutoWidthSize(columnsCount);
         return this;
@@ -63,19 +42,20 @@ internal class SheetWriter : ISheetWriter
         Action<IDataSetter<TSourceObject>> writerAction, 
         int startRowIndex)
     {
-        var lastHeader = _headers.OrderByDescending(p => p.Key)
-            .Select(p => p.Value)
+        var lastHeader = _sheetHeaders.OrderByDescending(p => p.RowIndex)
             .FirstOrDefault() ?? throw new NotSupportedException("无法获取表头");
 
         PropertyGetterProvider getterProvider = new();
         int rowIndex = startRowIndex;
         if (rowIndex == -1)
-            rowIndex = _headers.Count;
+            rowIndex = _sheetHeaders.Count;
 
+        var columns = lastHeader.HeaderTexts.ToArray();
+        ColumnIndices columnIndices = new(columns, lastHeader.StartColIndex);
         foreach (var sourceObject in sourceObjects)
         {
             var dataRow = _sheet.GetRow(rowIndex) ?? _sheet.CreateRow(rowIndex);
-            IDataSetter<TSourceObject> dataWriter = new DataSetter<TSourceObject>(lastHeader,
+            IDataSetter<TSourceObject> dataWriter = new DataSetter<TSourceObject>(columnIndices,
                 dataRow,
                 getterProvider,
                 sourceObject);

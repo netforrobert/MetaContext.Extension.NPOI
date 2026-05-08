@@ -5,9 +5,10 @@ namespace MetaContext.Extension.NPOI.Writer;
 
 public interface ISheetWriter
 {
-    ISheetWriter CreateHeader(string[] headers,
+    ISheetWriter CreateHeader(Action<ISheetHeader> action,
         int colStartIndex = 0,
-        int rowIndex = 0);
+        int rowIndex = 0,
+        int rows = 1);
 
     ISheetWriter Write<TSourceObject>(IEnumerable<TSourceObject> sourceObjects,
         Action<IDataSetter<TSourceObject>> writerAction,
