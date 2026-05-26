@@ -1,0 +1,19 @@
+# 标记为根配置文件，防止被其他上级目录的同名文件覆盖
+root = true
+
+# 适用于所有文件的通用设置
+[*]
+indent_style = space
+indent_size = 4
+
+# 针对所有 C# 文件的特定设置
+[*.cs]
+# 核心规则：强制参数换行（用于参数声明、方法调用等）
+csharp_new_line_between_parameters = true
+# 配合规则：定义换行后参数的缩进方式
+csharp_indent_arguments = true
+
+# 备用规则：针对过长的参数列表强制换行（可选）
+# 你也可以单独配置换行阈值，与 csharp_new_line_between_parameters 不同
+# csharp_preserve_single_line_blocks = true
+# max_line_length = 120

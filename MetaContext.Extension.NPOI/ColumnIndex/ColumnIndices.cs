@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-namespace MetaContext.Extension.NPOI.ColumIndex;
+namespace MetaContext.Extension.NPOI.ColumnIndex;
 
 public class ColumnIndices : IColumnIndices
 {
-    private readonly Dictionary<string, ColumnIndex> _colIndexs = new();
+    private readonly Dictionary<string, ColIndex> _colIndexs = new();
 
     public ColumnIndices(string[] columns,
         int startIndex = 0)
@@ -68,18 +66,18 @@ public class ColumnIndices : IColumnIndices
             if (mergedIndexs.ContainsKey(index))
             {
                 var indexs = mergedIndexs[index];
-                _colIndexs[key] = new ColumnIndex(indexs[0], indexs[1], col, relativeIndex);
+                _colIndexs[key] = new ColIndex(indexs[0], indexs[1], col, relativeIndex);
             }
             else
-                _colIndexs[key] = new ColumnIndex(index, index, col, relativeIndex);
+                _colIndexs[key] = new ColIndex(index, index, col, relativeIndex);
         }
     }
 
     public int ColumnsCount => _colIndexs.Count;
 
-    public ColumnIndex this[string key] => _colIndexs[key];
+    public ColIndex this[string key] => _colIndexs[key];
 
-    public ColumnIndex GetColIndex(string colName, int relativeIndex)
+    public ColIndex GetColIndex(string colName, int relativeIndex)
     {
         string key = $"{colName}_{relativeIndex}";
         if (_colIndexs.ContainsKey(key))
@@ -88,6 +86,6 @@ public class ColumnIndices : IColumnIndices
         return null;
     }
 
-    public IEnumerable<ColumnIndex> Indices
+    public IEnumerable<ColIndex> Indices
         => _colIndexs.Values.OrderBy(p => p.StartIndex);
 }

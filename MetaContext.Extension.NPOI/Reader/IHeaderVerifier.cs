@@ -1,4 +1,4 @@
-﻿using MetaContext.Extension.NPOI.ColumIndex;
+﻿using MetaContext.Extension.NPOI.ColumnIndex;
 
 using NPOI.SS.UserModel;
 

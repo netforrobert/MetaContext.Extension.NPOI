@@ -14,5 +14,10 @@ public interface ISheetWriter
         Action<IDataSetter<TSourceObject>> writerAction,
         int startRowIndex = -1);
 
+    ISheetWriter Write<TSourceObject>(IEnumerable<TSourceObject> sourceObjects,
+        Action<IRowsWriter<TSourceObject>> writerAction,
+        int startRowIndex = -1,
+        Func<TSourceObject, int> rowsSelector = null);
+
     ISheetWriter UseDefaultAutoWidthSize(int columnsCount = 0);
 }

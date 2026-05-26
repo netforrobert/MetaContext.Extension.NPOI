@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using MetaContext.Extension.NPOI.ColumIndex;
+using MetaContext.Extension.NPOI.ColumnIndex;
 
+using NPOI.POIFS.Crypt.Dsig;
 using NPOI.SS.UserModel;
 
 using Org.BouncyCastle.Asn1.X509;
@@ -61,6 +62,38 @@ internal class SheetWriter : ISheetWriter
                 sourceObject);
             writerAction(dataWriter);
             rowIndex++;
+        }
+
+        return this;
+    }
+
+    public ISheetWriter Write<TSourceObject>(IEnumerable<TSourceObject> sourceObjects, 
+        Action<IRowsWriter<TSourceObject>> writerAction,
+        int startRowIndex,
+        Func<TSourceObject, int> rowsSelector)
+    {
+        var lastHeader = _sheetHeaders.OrderByDescending(p => p.RowIndex)
+            .FirstOrDefault() ?? throw new NotSupportedException("无法获取表头");
+
+        PropertyGetterProvider getterProvider = new();
+        int rowIndex = startRowIndex;
+        if (rowIndex == -1)
+            rowIndex = _sheetHeaders.Count;
+
+        var columns = lastHeader.HeaderTexts.ToArray();
+        ColumnIndices columnIndices = new(columns, lastHeader.StartColIndex);
+        foreach (var sourceObject in sourceObjects)
+        {
+            int rows = rowsSelector?.Invoke(sourceObject) ?? 1;
+            var dataRow = _sheet.GetRow(rowIndex) ?? _sheet.CreateRow(rowIndex);
+            var rowWriter = new RowSetter(dataRow, columnIndices, rows);
+            IRowsWriter<TSourceObject> rowsWriter = new RowsWriter<TSourceObject>(rowIndex,
+                getterProvider,
+                sourceObject,
+                rowWriter);
+
+            writerAction(rowsWriter);
+            rowIndex += rows;
         }
 
         return this;

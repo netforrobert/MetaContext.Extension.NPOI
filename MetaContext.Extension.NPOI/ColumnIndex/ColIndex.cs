@@ -1,8 +1,8 @@
-﻿namespace MetaContext.Extension.NPOI.ColumIndex;
+namespace MetaContext.Extension.NPOI.ColumnIndex;
 
-public record ColumnIndex
+public record ColIndex
 {
-    public ColumnIndex(int startIndex,
+    public ColIndex(int startIndex,
         int endIndex,
         string name,
         int relativeIndex)

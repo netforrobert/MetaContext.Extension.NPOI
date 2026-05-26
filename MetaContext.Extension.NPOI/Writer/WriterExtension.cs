@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 
-using MetaContext.Extension.NPOI.ColumIndex;
-
-using NPOI.HSSF.Util;
 using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
@@ -103,5 +99,44 @@ public static class WriterExtension
         return new BytesContent(fileName,
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             content);
+    }
+
+    /// <summary>
+    /// 设置单元格值，支持常见类型
+    /// </summary>
+    /// <typeparam name="T">值类型</typeparam>
+    /// <param name="cell">单元格</param>
+    /// <param name="value">值</param>
+    /// <returns>当前单元格</returns>
+    public static ICell SetTargetValue<TTarget>(this ICell cell, TTarget value)
+    {
+        if (value == null)
+            return cell;
+
+        var type = typeof(T);
+        switch (type)
+        {
+            case Type t when t == typeof(bool):
+                cell.SetCellValue((bool)(object)value);
+                break;
+            case Type t when t == typeof(int):
+                cell.SetCellValue((int)(object)value);
+                break;
+            case Type t when t == typeof(long):
+                cell.SetCellValue((long)(object)value);
+                break;
+            case Type t when t == typeof(DateTime):
+                cell.SetCellValue((DateTime)(object)value);
+                break;
+            case Type t when t == typeof(decimal) || t == typeof(double):
+                cell.SetCellValue((double)(object)value);
+                break;
+            case Type t when t == typeof(string):
+            default:
+                cell.SetCellValue(value.ToString());
+                break;
+        }
+
+        return cell;
     }
 }
