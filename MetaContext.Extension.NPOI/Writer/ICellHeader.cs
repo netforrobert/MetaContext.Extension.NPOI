@@ -6,6 +6,8 @@ public interface ICellHeader
 {
     int Cols { get; }
 
+    int Rows { get; }
+
     string HeaderText { get; }
 
     ICellHeader RightMerge(int cols);

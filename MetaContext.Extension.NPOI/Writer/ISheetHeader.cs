@@ -17,5 +17,5 @@ public interface ISheetHeader
 
     ISheetHeader Draw(Action<ICellHeader> action);
 
-    ISheetHeader Next(int skipCols = 1);
+    ISheetHeader Next(int skipCols = 1, int cellCols = 1);
 }

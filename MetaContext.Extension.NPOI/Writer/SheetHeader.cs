@@ -17,7 +17,8 @@ internal class SheetHeader : ISheetHeader
     public SheetHeader(ISheet sheet,
         int rowIndex, 
         int rows, 
-        int colIndex)
+        int colIndex,
+        int firstCols)
     {
         _sheet = sheet;
         RowIndex = rowIndex;
@@ -35,7 +36,12 @@ internal class SheetHeader : ISheetHeader
         headerStyle.SetNormalBorder();
         _defaultHeaderStyle = headerStyle;
 
-        _cellHeaders.Add(new CellHeader(_colIndex, RowIndex, Rows, _sheet, _defaultHeaderStyle));
+        _cellHeaders.Add(new CellHeader(_colIndex, 
+            RowIndex, 
+            Rows,
+            firstCols,
+            _sheet, 
+            _defaultHeaderStyle));
     }
 
     public int RowIndex { get; private set; }
@@ -56,18 +62,20 @@ internal class SheetHeader : ISheetHeader
 
     public int StartColIndex { get; private set; }
 
-    public ISheetHeader Next(int skipCols)
+    private ICellHeader CurrentHeader
+        => _cellHeaders[_cellHeaders.Count - 1];
+
+    public ISheetHeader Next(int skipCols, int cellCols)
     {
-        _colIndex += skipCols;
-        var cellHeader = new CellHeader(_colIndex, RowIndex, Rows, _sheet, _defaultHeaderStyle);
+        _colIndex += (CurrentHeader.Cols - 1 + skipCols);
+        var cellHeader = new CellHeader(_colIndex, RowIndex, Rows, cellCols, _sheet, _defaultHeaderStyle);
         _cellHeaders.Add(cellHeader);
         return this;
     }
 
     public ISheetHeader Draw(Action<ICellHeader> action)
     {
-        var current = _cellHeaders[_cellHeaders.Count - 1];
-        action(current);
+        action(CurrentHeader);
         return this;
     }
 }
