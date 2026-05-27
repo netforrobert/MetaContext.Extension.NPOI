@@ -22,9 +22,10 @@ internal class SheetWriter : ISheetWriter
     public ISheetWriter CreateHeader(Action<ISheetHeader> action,
         int colStartIndex = 0,
         int rowIndex = 0,
-        int rows = 1)
+        int rows = 1,
+        int firstCols = 1)
     {
-        var header = new SheetHeader(_sheet, rowIndex, rows, colStartIndex);
+        var header = new SheetHeader(_sheet, rowIndex, rows, colStartIndex, firstCols);
         action(header);
         _sheetHeaders.Add(header);
         return this;
@@ -40,34 +41,6 @@ internal class SheetWriter : ISheetWriter
     }
 
     public ISheetWriter Write<TSourceObject>(IEnumerable<TSourceObject> sourceObjects, 
-        Action<IDataSetter<TSourceObject>> writerAction, 
-        int startRowIndex)
-    {
-        var lastHeader = _sheetHeaders.OrderByDescending(p => p.RowIndex)
-            .FirstOrDefault() ?? throw new NotSupportedException("无法获取表头");
-
-        PropertyGetterProvider getterProvider = new();
-        int rowIndex = startRowIndex;
-        if (rowIndex == -1)
-            rowIndex = _sheetHeaders.Count;
-
-        var columns = lastHeader.HeaderTexts.ToArray();
-        ColumnIndices columnIndices = new(columns, lastHeader.StartColIndex);
-        foreach (var sourceObject in sourceObjects)
-        {
-            var dataRow = _sheet.GetRow(rowIndex) ?? _sheet.CreateRow(rowIndex);
-            IDataSetter<TSourceObject> dataWriter = new DataSetter<TSourceObject>(columnIndices,
-                dataRow,
-                getterProvider,
-                sourceObject);
-            writerAction(dataWriter);
-            rowIndex++;
-        }
-
-        return this;
-    }
-
-    public ISheetWriter Write<TSourceObject>(IEnumerable<TSourceObject> sourceObjects, 
         Action<IRowsWriter<TSourceObject>> writerAction,
         int startRowIndex,
         Func<TSourceObject, int> rowsSelector)
@@ -78,7 +51,7 @@ internal class SheetWriter : ISheetWriter
         PropertyGetterProvider getterProvider = new();
         int rowIndex = startRowIndex;
         if (rowIndex == -1)
-            rowIndex = _sheetHeaders.Count;
+            rowIndex = _sheetHeaders.Select(p => p.Rows).Sum();
 
         var columns = lastHeader.HeaderTexts.ToArray();
         ColumnIndices columnIndices = new(columns, lastHeader.StartColIndex);

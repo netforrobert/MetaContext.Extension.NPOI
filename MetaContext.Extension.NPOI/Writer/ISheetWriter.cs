@@ -8,11 +8,8 @@ public interface ISheetWriter
     ISheetWriter CreateHeader(Action<ISheetHeader> action,
         int colStartIndex = 0,
         int rowIndex = 0,
-        int rows = 1);
-
-    ISheetWriter Write<TSourceObject>(IEnumerable<TSourceObject> sourceObjects,
-        Action<IDataSetter<TSourceObject>> writerAction,
-        int startRowIndex = -1);
+        int rows = 1,
+        int firstCols = 1);
 
     ISheetWriter Write<TSourceObject>(IEnumerable<TSourceObject> sourceObjects,
         Action<IRowsWriter<TSourceObject>> writerAction,

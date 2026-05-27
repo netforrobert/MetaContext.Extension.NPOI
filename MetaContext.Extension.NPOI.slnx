@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="MetaContext.Extension.NPOI.Tests/MetaContext.Extension.NPOI.Tests.csproj" Id="a09630fe-750f-4ab3-885b-b6ef2eed80f0" />
   <Project Path="MetaContext.Extension.NPOI/MetaContext.Extension.NPOI.csproj" />
 </Solution>

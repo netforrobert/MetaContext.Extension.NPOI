@@ -1,4 +1,3 @@
-using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
 
@@ -22,6 +21,8 @@ internal class CellWriter : ICellWriter
         ColumnIndex = columnIndex;
         _maxRows = maxRows;
         _maxCols = maxCols;
+        Rows = maxRows;
+        Cols = maxCols;
     }
 
     public int RowIndex { get; private set; }
