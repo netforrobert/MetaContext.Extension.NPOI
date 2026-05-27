@@ -3,26 +3,28 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 
+using NPOI.SS.UserModel;
+
 namespace MetaContext.Extension.NPOI.Writer;
 
 internal class RowsWriter<TData> : IRowsWriter<TData>
 {
-    private readonly IPropertyGetterProvider _propertyGetterProvider;
     private readonly TData _sourceObject;
     private readonly IRowSetter _rowSetter;
+    private readonly ISheet _sheet;
 
     public RowsWriter(int startRowIndex,
-        IPropertyGetterProvider propertyGetterProvider,
         TData sourceObject,
-        IRowSetter rowSetter)
+        IRowSetter rowSetter,
+        ISheet sheet)
     {
         StartRowIndex = startRowIndex;
-        _propertyGetterProvider = propertyGetterProvider;
         _sourceObject = sourceObject;
         _rowSetter = rowSetter;
+        _sheet = sheet;
     }
 
-    public int Rows { get; private set; }
+    public int Rows => _rowSetter.Rows;
 
     public int StartRowIndex { get; private set; }
 
@@ -33,18 +35,10 @@ internal class RowsWriter<TData> : IRowsWriter<TData>
     }
 
     public IRowsWriter<TData> Set<TProperty, TTargetValue>(string headerName,
-        Expression<Func<TData, TProperty>> expression,
+        Func<TData, TProperty> propertyFactory,
         Func<TProperty, TTargetValue> convertor = null,
         int headerIndex = 0)
     {
-        if (expression.Body is not MemberExpression memberExpression
-            || memberExpression.Member is not PropertyInfo property)
-            throw new NotSupportedException($"不支持的表达式：{expression}");
-
-        string keyName = $"{typeof(TData).FullName}-{property.Name}";
-        Func<TData, TProperty> selector = _propertyGetterProvider.GetOrAdd(keyName,
-            keyName => expression.Compile());
-
         static TTargetValue ConvertToTargetValue(TProperty property)
         {
             if (typeof(TTargetValue) == typeof(TProperty))
@@ -53,24 +47,44 @@ internal class RowsWriter<TData> : IRowsWriter<TData>
             return (TTargetValue)Convert.ChangeType(property, typeof(TTargetValue));
         }
 
-        var value = selector(_sourceObject);
+        var value = propertyFactory(_sourceObject);
         convertor ??= ConvertToTargetValue;
         _rowSetter.Set(headerName, convertor(value), headerIndex);
         return this;
     }
 
     public IRowsWriter<TData> Set<TProperty>(string headerName,
-        Expression<Func<TData, TProperty>> expression,
+        Func<TData, TProperty> propertyFactory,
         int headerIndex = 0)
-        => Set<TProperty, TProperty>(headerName, expression, null, headerIndex);
+        => Set<TProperty, TProperty>(headerName, propertyFactory, null, headerIndex);
 
-    public IRowsWriter<TData> SetItems<TItem>(string headerName,
-        Expression<Func<TData, IEnumerable<TItem>>> dataSourceExp,
-        Expression<Func<TData, int>> rowsSelector,
+    public IRowsWriter<TData> SetItems<TItem>(Func<TData, IEnumerable<TItem>> itemsSelector,
+        Func<TData, int> rowsSelector,
         Action<IRowsGroupWriter<TData>> grpWriterAction,
-        Action<IRowsWriter<TItem>> itemsAction)
+        Action<IRowsWriter<TItem>> itemsAction,
+        Func<TItem, int> itemRowsSelector)
     {
-        throw new NotImplementedException();
+        int rows = rowsSelector(_sourceObject);
+        var items = itemsSelector(_sourceObject);
+        IRowsGroupWriter<TData> grpWriter = new RowsGroupWriter<TData>(_sourceObject, _rowSetter);
+        grpWriterAction(grpWriter);
+
+        int rowIndex = StartRowIndex;
+        foreach (var item in items)
+        {
+            var itemRow = _sheet.GetRow(rowIndex) ?? _sheet.CreateRow(rowIndex);
+            itemRowsSelector ??= x => 1;
+            int itemRows = itemRowsSelector(item);
+            var itemRowSetter = new RowSetter(itemRow, _rowSetter.ColumnIndices, itemRows);
+            IRowsWriter<TItem> rowsWriter = new RowsWriter<TItem>(StartRowIndex,
+                item,
+                itemRowSetter,
+                _sheet);
+            itemsAction(rowsWriter);
+            rowIndex += rowsWriter.Rows;
+        }
+
+        return this;
     }
 
 }

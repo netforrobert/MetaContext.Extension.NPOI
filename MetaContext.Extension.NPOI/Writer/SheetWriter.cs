@@ -88,9 +88,9 @@ internal class SheetWriter : ISheetWriter
             var dataRow = _sheet.GetRow(rowIndex) ?? _sheet.CreateRow(rowIndex);
             var rowWriter = new RowSetter(dataRow, columnIndices, rows);
             IRowsWriter<TSourceObject> rowsWriter = new RowsWriter<TSourceObject>(rowIndex,
-                getterProvider,
                 sourceObject,
-                rowWriter);
+                rowWriter,
+                _sheet);
 
             writerAction(rowsWriter);
             rowIndex += rows;

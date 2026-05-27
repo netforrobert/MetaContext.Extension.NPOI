@@ -5,8 +5,8 @@ namespace MetaContext.Extension.NPOI.Writer;
 
 public interface IRowsGroupWriter<TData>
 {
-    IRowsWriter<TData> Set<TProperty, TTargetValue>(string headerName,
-        Expression<Func<TData, TProperty>> propSelector,
+    IRowsGroupWriter<TData> Set<TProperty, TTargetValue>(string headerName,
+        Func<TData, TProperty> propSelector,
         Action<ICellWriter, TProperty> writerAction = null,
         int headerIndex = 0);
 }

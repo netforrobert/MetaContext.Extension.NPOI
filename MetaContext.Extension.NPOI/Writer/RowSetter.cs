@@ -23,6 +23,9 @@ internal class RowSetter : IRowSetter
 
     public int Rows { get; private set; }
 
+    public ColumnIndices ColumnIndices
+        => _colIndexs;
+
     public ICellWriter CreaterCellWriter(string columnName, int index = 0, int cols = 1)
     {
         var colIndex = _colIndexs.GetColIndex(columnName, index)

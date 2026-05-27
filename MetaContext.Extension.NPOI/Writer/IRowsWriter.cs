@@ -11,19 +11,19 @@ public interface IRowsWriter<TData>
 
     int StartRowIndex { get; }
 
-    IRowsWriter<TData> SetItems<TItem>(string headerName,
-        Expression<Func<TData, IEnumerable<TItem>>> dataSourceExp,
-        Expression<Func<TData, int>> rowsSelector,
+    IRowsWriter<TData> SetItems<TItem>(Func<TData, IEnumerable<TItem>> itemsSelector,
+        Func<TData, int> rowsSelector,
         Action<IRowsGroupWriter<TData>> grpWriterAction,
-        Action<IRowsWriter<TItem>> itemsAction);
+        Action<IRowsWriter<TItem>> itemsAction,
+        Func<TItem, int> itemRowsSelector);
 
     IRowsWriter<TData> Set<TProperty, TTargetValue>(string headerName,
-        Expression<Func<TData, TProperty>> expression,
+        Func<TData, TProperty> propertyFactory,
         Func<TProperty, TTargetValue> convertor = null,
         int headerIndex = 0);
 
     IRowsWriter<TData> Set<TProperty>(string headerName,
-        Expression<Func<TData, TProperty>> expression,
+        Func<TData, TProperty> propertyFactory,
         int headerIndex = 0);
 
     IRowsWriter<TData> ExtraSet(Action<IRowSetter, TData> extraAction);
