@@ -18,4 +18,8 @@ public interface ISheetHeader
     ISheetHeader Draw(Action<IRegionHeader> action);
 
     ISheetHeader Next(int skipCols = 1, int cellCols = 1);
+
+    ISheetHeader Block(string text, Action<IRegionBlock> action);
+
+    ISheetHeader Col(string text, int colspan = 1, int downMerge = 1);
 }

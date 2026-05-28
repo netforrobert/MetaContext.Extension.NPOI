@@ -1,6 +1,8 @@
 ﻿using NPOI.SS.Formula.Functions;
 using NPOI.XSSF.UserModel;
 
+using static NPOI.HSSF.Util.HSSFColor;
+
 namespace MetaContext.Extension.NPOI.Tests;
 
 public class WriterTests
@@ -13,35 +15,27 @@ public class WriterTests
             .UseSheetWriter()
             .CreateHeader(header =>
             {
-                header.Draw(col => col.Draw(cell => cell.RightMerge(3).SetHeaderText("基本信息")))
-                .Next(skipCols: 1, cellCols: 8)
-                .Draw(col => col.Draw(cell => cell.RightMerge(8).SetHeaderText("2025年绩效")))
-                .Next(skipCols: 1, cellCols: 2)
-                .Draw(col => col.Draw(cell => cell.RightMerge(2).SetHeaderText("2026年绩效")));
-            },
-            firstCols: 3)
-            .CreateHeader(header =>
-            {
-                string[] quarters = ["第一季度", "第二季度", "第三季度", "第四季度"];
-                header.Draw(col =>
+                header.Block("基本信息", block =>
                 {
-                    col.Draw(cell => cell.DownMerge(2).SetHeaderText("员工ID"))
-                    .Move(0, 1, cell => cell.DownMerge(2).SetHeaderText("姓名"))
-                    .Move(0, 2, cell => cell.DownMerge(2).SetHeaderText("部门"));
-                });
-
-                foreach (var quarter in quarters)
+                    block.Col("员工ID", downMerge: 2);
+                    block.Col("姓名", downMerge: 2);
+                    block.Col("部门", downMerge: 2);
+                })
+                .Block("2025年绩效", block =>
                 {
-                    header.Next(2).Draw(col =>
+                    string[] quarters = ["第一季度", "第二季度", "第三季度", "第四季度"];
+                    foreach (string quarter in quarters)
                     {
-                        col.Draw(cell => cell.RightMerge(2).SetHeaderText(quarter))
-                          .Move(1, 0, cell => cell.SetHeaderText("销售额"))
-                          .Move(1, 1, cell => cell.SetHeaderText("利润"));
-                    });
-                }
+                        block.Block(quarter, block1 =>
+                        {
+                            block1.Col("销售额");
+                            block1.Col("利润");
+                        });
+                    }
+                })
+                .Col("备注", colspan: 3, downMerge: 3);
             },
-            rowIndex: 1,
-            rows: 2,
+            rows: 3,
             firstCols: 3);
     }
 }
