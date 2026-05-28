@@ -4,7 +4,15 @@ namespace MetaContext.Extension.NPOI.Writer;
 
 public interface IRegionBlock
 {
-    IRegionBlock Block(string text, Action<IRegionBlock> action);
+    int StartRowIndex { get; }
 
-    void Col(string text, int colspan = 1, int downMerge = 1);
+    int StartColIndex { get; }
+
+    int Rows { get; }
+
+    int Cols { get; }
+
+    void Block(string text, Action<IRegionBlock> action);
+
+    void Col(string text, int rightMerge = 1, int downMerge = 1);
 }

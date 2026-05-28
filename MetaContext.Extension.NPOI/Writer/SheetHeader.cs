@@ -2,28 +2,28 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using NPOI.OpenXmlFormats.Spreadsheet;
 using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
+
+using static NPOI.HSSF.Util.HSSFColor;
 
 namespace MetaContext.Extension.NPOI.Writer;
 
 internal class SheetHeader : ISheetHeader
 {
-    private readonly List<CellHeader> _cellHeaders = new();
+    private readonly List<IRegionBlock> _blocks = new();
     private readonly ISheet _sheet;
     private readonly ICellStyle _defaultHeaderStyle;
-    private int _colIndex;
 
     public SheetHeader(ISheet sheet,
         int rowIndex, 
         int rows, 
-        int colIndex,
-        int firstCols)
+        int colIndex)
     {
         _sheet = sheet;
         RowIndex = rowIndex;
         Rows = rows;
-        _colIndex = colIndex;
         StartColIndex = colIndex;
         
         //默认表头样式
@@ -35,47 +35,48 @@ internal class SheetHeader : ISheetHeader
         headerStyle.Alignment = HorizontalAlignment.Center;
         headerStyle.SetNormalBorder();
         _defaultHeaderStyle = headerStyle;
-
-        _cellHeaders.Add(new CellHeader(_colIndex, 
-            RowIndex, 
-            Rows,
-            firstCols,
-            _sheet, 
-            _defaultHeaderStyle));
     }
 
     public int RowIndex { get; private set; }
 
     public int Rows { get; private set; }
 
-    public int Cols
+    public int StartColIndex { get; private set; }
+
+    public int Cols 
     {
         get
         {
-            var sumCols = _cellHeaders.Select(p => p.Cols).Sum();
-            return sumCols + _colIndex + 1;
+            if (_blocks.Count == 0)
+                return 1;
+
+            return _blocks.Select(p => p.Cols).Sum();
         }
     }
 
-    public IEnumerable<string> HeaderTexts
-        => _cellHeaders.Select(p => p.HeaderText);
+    public IEnumerable<string> HeaderTexts => throw new NotImplementedException();
 
-    public int StartColIndex { get; private set; }
-
-    private ICellHeader CurrentHeader
-        => _cellHeaders[_cellHeaders.Count - 1];
-
-    public ISheetHeader Next(int skipCols, int cellCols)
+    public ISheetHeader Block(string text, Action<IRegionBlock> action)
     {
-        _colIndex += (CurrentHeader.Cols - 1 + skipCols);
-        var cellHeader = new CellHeader(_colIndex, RowIndex, Rows, cellCols, _sheet, _defaultHeaderStyle);
-        _cellHeaders.Add(cellHeader);
+        int colIndex = StartColIndex + Cols;
+        var block = new RegionBlock(_sheet, 
+            _defaultHeaderStyle,
+            RowIndex + 1,
+            colIndex);
+        action(block);
+
+        var row = _sheet.GetRow(RowIndex) ?? _sheet.CreateRow(RowIndex);
+        var regionCell = new RegionCell(row, colIndex);
+        regionCell.SetValue(text, rightMerge: block.Cols);
         return this;
     }
 
-    public ISheetHeader Draw(Action<ICellHeader> action)
+    public ISheetHeader Col(string text, int rightMerge = 1, int downMerge = 1)
     {
-        action(CurrentHeader);
+        var row = _sheet.GetRow(RowIndex) ?? _sheet.CreateRow(RowIndex);
+        int colIndex = StartColIndex + Cols;
+        var regionCell = new RegionCell(row, colIndex);
+        regionCell.SetValue(text, rightMerge, downMerge, _defaultHeaderStyle);
         return this;
     }
 }

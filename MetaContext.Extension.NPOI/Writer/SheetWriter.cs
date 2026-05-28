@@ -22,10 +22,9 @@ internal class SheetWriter : ISheetWriter
     public ISheetWriter CreateHeader(Action<ISheetHeader> action,
         int colStartIndex = 0,
         int rowIndex = 0,
-        int rows = 1,
-        int firstCols = 1)
+        int rows = 1)
     {
-        var header = new SheetHeader(_sheet, rowIndex, rows, colStartIndex, firstCols);
+        var header = new SheetHeader(_sheet, rowIndex, rows, colStartIndex);
         action(header);
         _sheetHeaders.Add(header);
         return this;

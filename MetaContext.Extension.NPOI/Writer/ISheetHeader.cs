@@ -15,11 +15,7 @@ public interface ISheetHeader
 
     IEnumerable<string> HeaderTexts { get; }
 
-    ISheetHeader Draw(Action<IRegionHeader> action);
-
-    ISheetHeader Next(int skipCols = 1, int cellCols = 1);
-
     ISheetHeader Block(string text, Action<IRegionBlock> action);
 
-    ISheetHeader Col(string text, int colspan = 1, int downMerge = 1);
+    ISheetHeader Col(string text, int rightMerge = 1, int downMerge = 1);
 }

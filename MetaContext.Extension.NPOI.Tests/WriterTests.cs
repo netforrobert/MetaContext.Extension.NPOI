@@ -33,9 +33,8 @@ public class WriterTests
                         });
                     }
                 })
-                .Col("备注", colspan: 3, downMerge: 3);
+                .Col("备注", rightMerge: 3, downMerge: 3);
             },
-            rows: 3,
-            firstCols: 3);
+            rows: 3);
     }
 }
