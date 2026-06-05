@@ -33,6 +33,7 @@ internal class SheetHeader : ISheetHeader
         font.IsBold = true;
         headerStyle.SetFont(font);
         headerStyle.Alignment = HorizontalAlignment.Center;
+        headerStyle.VerticalAlignment = VerticalAlignment.Center;
         headerStyle.SetNormalBorder();
         _defaultHeaderStyle = headerStyle;
     }
@@ -47,9 +48,6 @@ internal class SheetHeader : ISheetHeader
     {
         get
         {
-            if (_blocks.Count == 0)
-                return 1;
-
             return _blocks.Select(p => p.Cols).Sum();
         }
     }
@@ -64,10 +62,10 @@ internal class SheetHeader : ISheetHeader
             RowIndex + 1,
             colIndex);
         action(block);
-
+        _blocks.Add(block);
         var row = _sheet.GetRow(RowIndex) ?? _sheet.CreateRow(RowIndex);
         var regionCell = new RegionCell(row, colIndex);
-        regionCell.SetValue(text, rightMerge: block.Cols);
+        regionCell.SetValue(text, rightMerge: block.Cols, cellStyle: _defaultHeaderStyle);
         return this;
     }
 

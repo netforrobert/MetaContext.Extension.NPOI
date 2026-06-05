@@ -7,6 +7,8 @@ using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
 
+using Org.BouncyCastle.Utilities;
+
 namespace MetaContext.Extension.NPOI.Writer;
 
 public static class WriterExtension
@@ -96,9 +98,18 @@ public static class WriterExtension
         workbook.Write(memoryStream);
         byte[] content = memoryStream.ToArray();
 
-        return new BytesContent(fileName,
+        var bytesContent = new BytesContent(fileName,
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             content);
+        workbook.Close();
+        return bytesContent;
+    }
+
+    public static void SaveToFile(this IWorkbook workbook, string fileName)
+    {
+        using FileStream file = new(fileName, FileMode.Create, FileAccess.Write);
+        workbook.Write(file);
+        workbook.Close();
     }
 
     /// <summary>

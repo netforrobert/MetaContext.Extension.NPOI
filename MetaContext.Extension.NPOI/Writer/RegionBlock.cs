@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
@@ -7,6 +9,7 @@ namespace MetaContext.Extension.NPOI.Writer;
 
 internal class RegionBlock : IRegionBlock
 {
+    private readonly List<IRegionBlock> _blocks = new();
     private readonly ISheet _sheet;
     private readonly IRow _row;
     private readonly ICellStyle _cellStyle;
@@ -23,8 +26,6 @@ internal class RegionBlock : IRegionBlock
         _row = _sheet.GetRow(startRowIndex) ?? _sheet.CreateRow(startRowIndex);
         _startColumnIndex = startColumnIndex;
         _columnIndex = startColumnIndex;
-        Rows = 1;
-        Cols = 1;
     }
 
     public int StartRowIndex
@@ -41,19 +42,23 @@ internal class RegionBlock : IRegionBlock
     {
         var block = new RegionBlock(_sheet,
             _cellStyle,
-            _row.RowNum + Rows,
+            _row.RowNum + 1,
             _columnIndex);
         action(block);
+        _blocks.Add(block);
         var regionCell = new RegionCell(_row, _columnIndex);
-        regionCell.SetValue(text, rightMerge: block.Cols);
+        regionCell.SetValue(text, rightMerge: block.Cols, cellStyle: _cellStyle);
+        Cols += block.Cols;
+        Rows = _blocks.Select(p => p.Rows).Max() + 1;
+        _columnIndex += block.Cols;
     }
 
     public void Col(string text, int rightMerge = 1, int downMerge = 1)
     {
-        _columnIndex += (Cols - 1);
         var regionCell = new RegionCell(_row, _columnIndex);
         regionCell.SetValue(text, rightMerge, downMerge, _cellStyle);
-        Rows += downMerge;
+        _columnIndex += rightMerge;
         Cols += rightMerge;
+        Rows = Math.Max(Rows, downMerge);
     }
 }

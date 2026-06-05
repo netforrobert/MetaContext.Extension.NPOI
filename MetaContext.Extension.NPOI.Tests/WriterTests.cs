@@ -1,7 +1,7 @@
 ﻿using NPOI.SS.Formula.Functions;
 using NPOI.XSSF.UserModel;
 
-using static NPOI.HSSF.Util.HSSFColor;
+using MetaContext.Extension.NPOI.Writer;
 
 namespace MetaContext.Extension.NPOI.Tests;
 
@@ -23,7 +23,13 @@ public class WriterTests
                 })
                 .Block("2025年绩效", block =>
                 {
-                    string[] quarters = ["第一季度", "第二季度", "第三季度", "第四季度"];
+                    string[] quarters = 
+                    [
+                        "第一季度",
+                        "第二季度",
+                        "第三季度",
+                        "第四季度"
+                    ];
                     foreach (string quarter in quarters)
                     {
                         block.Block(quarter, block1 =>
@@ -36,5 +42,8 @@ public class WriterTests
                 .Col("备注", rightMerge: 3, downMerge: 3);
             },
             rows: 3);
+
+        string fileName = $"sheets/{Guid.NewGuid()}.xlsx";
+        sheets.SaveToFile(fileName);
     }
 }
