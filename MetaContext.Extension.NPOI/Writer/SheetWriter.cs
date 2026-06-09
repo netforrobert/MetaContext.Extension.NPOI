@@ -21,10 +21,9 @@ internal class SheetWriter : ISheetWriter
 
     public ISheetWriter CreateHeader(Action<ISheetHeader> action,
         int colStartIndex = 0,
-        int rowIndex = 0,
-        int rows = 1)
+        int rowIndex = 0)
     {
-        var header = new SheetHeader(_sheet, rowIndex, rows, colStartIndex);
+        var header = new SheetHeader(_sheet, rowIndex, colStartIndex);
         action(header);
         _sheetHeaders.Add(header);
         return this;

@@ -17,13 +17,13 @@ public class WriterTests
             {
                 header.Block("基本信息", block =>
                 {
-                    block.Col("员工ID", downMerge: 2);
-                    block.Col("姓名", downMerge: 2);
-                    block.Col("部门", downMerge: 2);
+                    block.Cell("员工ID", downMerge: 2);
+                    block.Cell("姓名", downMerge: 2);
+                    block.Cell("部门", downMerge: 2);
                 })
                 .Block("2025年绩效", block =>
                 {
-                    string[] quarters = 
+                    string[] quarters =
                     [
                         "第一季度",
                         "第二季度",
@@ -34,14 +34,13 @@ public class WriterTests
                     {
                         block.Block(quarter, block1 =>
                         {
-                            block1.Col("销售额");
-                            block1.Col("利润");
+                            block1.Cell("销售额");
+                            block1.Cell("利润");
                         });
                     }
                 })
-                .Col("备注", rightMerge: 3, downMerge: 3);
-            },
-            rows: 3);
+                .Block(block => block.Cell("备注", rightMerge: 3, downMerge: 3));
+            });
 
         string fileName = $"sheets/{Guid.NewGuid()}.xlsx";
         sheets.SaveToFile(fileName);

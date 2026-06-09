@@ -15,7 +15,7 @@ public interface ISheetHeader
 
     IEnumerable<string> HeaderTexts { get; }
 
-    ISheetHeader Block(string text, Action<IRegionBlock> action);
+    ISheetHeader Block(string text, Action<IHeaderBlock> action);
 
-    ISheetHeader Col(string text, int rightMerge = 1, int downMerge = 1);
+    ISheetHeader Block(Action<IHeaderBlock> action);
 }
