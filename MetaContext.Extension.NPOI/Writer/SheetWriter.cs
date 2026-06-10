@@ -20,10 +20,14 @@ internal class SheetWriter : ISheetWriter
         => _sheet = sheet;
 
     public ISheetWriter CreateHeader(Action<ISheetHeader> action,
-        int colStartIndex = 0,
-        int rowIndex = 0)
+        int colStartIndex,
+        int rowIndex,
+        ICellStyle cellStyle)
     {
-        var header = new SheetHeader(_sheet, rowIndex, colStartIndex);
+        var header = new SheetHeader(_sheet, 
+            rowIndex, 
+            colStartIndex,
+            cellStyle);
         action(header);
         _sheetHeaders.Add(header);
         return this;
@@ -32,7 +36,7 @@ internal class SheetWriter : ISheetWriter
     public ISheetWriter UseDefaultAutoWidthSize(int columnsCount)
     {
         if (columnsCount == 0 && _sheetHeaders.Count > 0)
-            columnsCount = _sheetHeaders.Select(p => p.Cols).Max();
+            columnsCount = _sheetHeaders.Select(p => p.Columns).Max();
 
         _sheet.UseDefaultAutoWidthSize(columnsCount);
         return this;
@@ -45,14 +49,14 @@ internal class SheetWriter : ISheetWriter
     {
         var lastHeader = _sheetHeaders.OrderByDescending(p => p.RowIndex)
             .FirstOrDefault() ?? throw new NotSupportedException("无法获取表头");
-
+        var headerColumns = lastHeader.HeaderTexts.ToArray();
+        var startColIndex = lastHeader.StartColIndex;
         PropertyGetterProvider getterProvider = new();
         int rowIndex = startRowIndex;
         if (rowIndex == -1)
             rowIndex = _sheetHeaders.Select(p => p.Rows).Sum();
 
-        var columns = lastHeader.HeaderTexts.ToArray();
-        ColumnIndices columnIndices = new(columns, lastHeader.StartColIndex);
+        ColumnIndices columnIndices = new(headerColumns, startColIndex);
         foreach (var sourceObject in sourceObjects)
         {
             int rows = rowsSelector?.Invoke(sourceObject) ?? 1;

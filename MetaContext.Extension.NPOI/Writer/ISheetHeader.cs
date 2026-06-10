@@ -11,11 +11,11 @@ public interface ISheetHeader
 
     int Rows { get; }
 
-    int Cols { get; }
+    int Columns { get; }
 
     IEnumerable<string> HeaderTexts { get; }
 
     ISheetHeader Block(string text, Action<IHeaderBlock> action);
 
-    ISheetHeader Block(Action<IHeaderBlock> action);
+    ISheetHeader Cell(string text, int rightMerge = 1, int downMerge = 1);
 }

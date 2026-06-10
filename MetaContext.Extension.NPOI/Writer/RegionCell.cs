@@ -40,7 +40,7 @@ internal class RegionCell : IRegionCell
             throw new ArgumentException("downMerge不能小于1");
 
         Rows = downMerge; 
-        Columns = downMerge;
+        Columns = rightMerge;
 
         var sheet = _row.Sheet;
         CellRangeAddress region = null;

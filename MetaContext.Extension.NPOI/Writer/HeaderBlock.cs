@@ -59,19 +59,19 @@ internal class HeaderBlock : IHeaderBlock
     {
         get 
         {
-            int colsByCells = _cells.Count switch
+            int cellsCols = _cells.Count switch
             {
-                0 => 1,
+                0 => 0,
                 _ => _cells.Select(p => p.Columns).Sum()
             };
 
-            int colByBlocks = _blocks.Count switch
+            int blocksCols = _blocks.Count switch
             {
-                0 => 1,
+                0 => 0,
                 _ => _blocks.Select(p => p.Columns).Sum()
             };
 
-            return Math.Max(colsByCells, colByBlocks);
+            return Math.Max(cellsCols, blocksCols);
         }
     }
 
@@ -83,19 +83,16 @@ internal class HeaderBlock : IHeaderBlock
 
     public void Block(string text, Action<IHeaderBlock> action)
     {
-        int colIndex = ColumnIndex + Columns - 1;
+        int colIndex = ColumnIndex + Columns;
         var block = new HeaderBlock(_sheet,
             _cellStyle,
-            RowIndex,
+            RowIndex + 1,
             colIndex,
             text);
         action(block);
         block.SetTitle();
         _blocks.Add(block);
     }
-
-    public void Block(Action<IHeaderBlock> action)
-        => Block(null, action);
 
     public void Cell(string text, int rightMerge = 1, int downMerge = 1)
     {
@@ -106,7 +103,7 @@ internal class HeaderBlock : IHeaderBlock
         };
 
         IRow row = _sheet.GetRow(rowIndex) ?? _sheet.CreateRow(rowIndex);
-        int colIndex = ColumnIndex + Columns - 1;
+        int colIndex = ColumnIndex + Columns;
         var headerCell = new HeaderCell(row, colIndex);
         headerCell.Text(text, rightMerge, downMerge, _cellStyle);
         _cells.Add(headerCell);

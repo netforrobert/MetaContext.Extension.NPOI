@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using NPOI.SS.UserModel;
+
 namespace MetaContext.Extension.NPOI.Writer;
 
 public interface ISheetWriter
 {
     ISheetWriter CreateHeader(Action<ISheetHeader> action,
         int colStartIndex = 0,
-        int rowIndex = 0);
+        int rowIndex = 0,
+        ICellStyle cellStyle = null);
 
     ISheetWriter Write<TSourceObject>(IEnumerable<TSourceObject> sourceObjects,
         Action<IRowsWriter<TSourceObject>> writerAction,

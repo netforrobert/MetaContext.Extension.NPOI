@@ -21,7 +21,5 @@ public interface IHeaderBlock
 
     void Block(string text, Action<IHeaderBlock> action);
 
-    void Block(Action<IHeaderBlock> action);
-
     void Cell(string value, int rightMerge = 1, int downMerge = 1);
 }

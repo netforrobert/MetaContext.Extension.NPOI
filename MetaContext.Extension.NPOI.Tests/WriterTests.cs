@@ -39,7 +39,7 @@ public class WriterTests
                         });
                     }
                 })
-                .Block(block => block.Cell("备注", rightMerge: 3, downMerge: 3));
+                .Cell("备注", rightMerge: 3, downMerge: 3);
             });
 
         string fileName = $"sheets/{Guid.NewGuid()}.xlsx";
