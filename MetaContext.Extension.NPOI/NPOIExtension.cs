@@ -28,4 +28,21 @@ public static class NPOIExtension
         char uppercaseLetter = (char)('A' + index);
         return uppercaseLetter.ToString();
     }
+
+    public static ISheetWriter CreateHeader(this ISheetWriter sheetWriter,
+        IEnumerable<string> headerCols,
+        int colStartIndex = 0,
+        int rowIndex = 0,
+        ICellStyle cellStyle = null)
+        {
+            sheetWriter.CreateHeader(header=>
+            {
+                foreach (var headerCol in headerCols)
+                    header.Cell(headerCol);
+            },
+            colStartIndex,
+            rowIndex,
+            cellStyle);
+            return sheetWriter;
+        }
 }

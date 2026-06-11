@@ -3,11 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
-
-using Org.BouncyCastle.Utilities;
 
 namespace MetaContext.Extension.NPOI.Writer;
 
@@ -124,14 +121,18 @@ public static class WriterExtension
         if (value == null)
             return cell;
 
-        var type = typeof(T);
+        var type = typeof(TTarget);
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            type = type.GetGenericArguments()[0];
+
         switch (type)
         {
             case Type t when t == typeof(bool):
-                cell.SetCellValue((bool)(object)value);
+                cell.SetCellValue(Convert.ToBoolean(value));
                 break;
-            case Type t when t == typeof(int):
-                cell.SetCellValue((int)(object)value);
+            case Type _ when type == typeof(int):
+            case Type _ when type == typeof(short):
+                cell.SetCellValue(Convert.ToInt32(value));
                 break;
             case Type t when t == typeof(long):
                 cell.SetCellValue((long)(object)value);
@@ -139,8 +140,10 @@ public static class WriterExtension
             case Type t when t == typeof(DateTime):
                 cell.SetCellValue((DateTime)(object)value);
                 break;
-            case Type t when t == typeof(decimal) || t == typeof(double):
-                cell.SetCellValue((double)(object)value);
+            case Type _ when type == typeof(decimal):
+            case Type _ when type == typeof(double):
+            case Type _ when type == typeof(float):
+                cell.SetCellValue(Convert.ToDouble(value));
                 break;
             case Type t when t == typeof(string):
             default:

@@ -45,4 +45,26 @@ public class WriterTests
         string fileName = $"sheets/{Guid.NewGuid()}.xlsx";
         sheets.SaveToFile(fileName);
     }
+
+    [Fact]
+    public void Test_SingleHeader()
+    {
+        static IEnumerable<string> GetHeaderCols(int rowNo = 0)
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                yield return $"表头{rowNo}_{i}";
+            }
+        }
+
+        XSSFWorkbook sheets = new();
+        sheets.CreateSheet().UseSheetWriter()
+            .CreateHeader(GetHeaderCols())
+            .CreateHeader(GetHeaderCols(1), rowIndex: 1)
+            .CreateHeader(GetHeaderCols(3), rowIndex: 3)
+            .UseDefaultAutoWidthSize();
+
+        string fileName = $"sheets/Test_SingleHeader_{Guid.NewGuid()}.xlsx";
+        sheets.SaveToFile(fileName);
+    }
 }
