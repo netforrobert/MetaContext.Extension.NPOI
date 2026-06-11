@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace MetaContext.Extension.NPOI.Writer;
+using NPOI.SS.UserModel;
+
+namespace MetaContext.Extension.NPOI.Header;
 
 public interface IHeaderBlock
 {
@@ -19,7 +21,12 @@ public interface IHeaderBlock
 
     ICollection<IHeaderBlock> Blocks { get; }
 
-    void Block(string text, Action<IHeaderBlock> action);
+    void Block(string text, 
+        Action<IHeaderBlock> action,
+        ICellStyle cellStyle = null);
 
-    void Cell(string value, int rightMerge = 1, int downMerge = 1);
+    void Cell(string value, 
+        int rightMerge = 1, 
+        int downMerge = 1,
+        ICellStyle cellStyle = null);
 }

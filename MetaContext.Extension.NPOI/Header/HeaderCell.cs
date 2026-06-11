@@ -1,6 +1,8 @@
-﻿using NPOI.SS.UserModel;
+﻿using MetaContext.Extension.NPOI.Writer;
 
-namespace MetaContext.Extension.NPOI.Writer;
+using NPOI.SS.UserModel;
+
+namespace MetaContext.Extension.NPOI.Header;
 
 internal class HeaderCell : RegionCell, IHeaderCell
 {

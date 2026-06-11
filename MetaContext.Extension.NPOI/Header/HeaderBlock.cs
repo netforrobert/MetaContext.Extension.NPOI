@@ -7,7 +7,7 @@ using MetaContext.Extension.NPOI.ColumnIndex;
 using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
 
-namespace MetaContext.Extension.NPOI.Writer;
+namespace MetaContext.Extension.NPOI.Header;
 
 internal class HeaderBlock : IHeaderBlock
 {
@@ -81,7 +81,9 @@ internal class HeaderBlock : IHeaderBlock
 
     public ICollection<IHeaderBlock> Blocks => _blocks.AsReadOnly();
 
-    public void Block(string text, Action<IHeaderBlock> action)
+    public void Block(string text, 
+        Action<IHeaderBlock> action,
+        ICellStyle cellStyle = null)
     {
         int colIndex = ColumnIndex + Columns;
         var block = new HeaderBlock(_sheet,
@@ -90,11 +92,14 @@ internal class HeaderBlock : IHeaderBlock
             colIndex,
             text);
         action(block);
-        block.SetTitle();
+        block.SetTitle(cellStyle);
         _blocks.Add(block);
     }
 
-    public void Cell(string text, int rightMerge = 1, int downMerge = 1)
+    public void Cell(string text, 
+        int rightMerge = 1, 
+        int downMerge = 1,
+        ICellStyle headerStyle = null)
     {
         int rowIndex = _titleText switch
         {
@@ -105,18 +110,20 @@ internal class HeaderBlock : IHeaderBlock
         IRow row = _sheet.GetRow(rowIndex) ?? _sheet.CreateRow(rowIndex);
         int colIndex = ColumnIndex + Columns;
         var headerCell = new HeaderCell(row, colIndex);
-        headerCell.Text(text, rightMerge, downMerge, _cellStyle);
+        headerStyle ??= _cellStyle;
+        headerCell.Text(text, rightMerge, downMerge, headerStyle);
         _cells.Add(headerCell);
     }
 
-    public void SetTitle()
+    public void SetTitle(ICellStyle headerStyle = null)
     {
         if (_titleText == null)
             return;
 
         var row = _sheet.GetRow(RowIndex) ?? _sheet.CreateRow(RowIndex);
         var headerCell = new HeaderCell(row, ColumnIndex);
-        headerCell.Text(_titleText, rightMerge: Columns, cellStyle: _cellStyle);
+        headerStyle ??= _cellStyle;
+        headerCell.Text(_titleText, rightMerge: Columns, cellStyle: headerStyle);
         Title = headerCell;
     }
 }

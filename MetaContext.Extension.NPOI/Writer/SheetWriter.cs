@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using MetaContext.Extension.NPOI.ColumnIndex;
+using MetaContext.Extension.NPOI.Header;
 
 using NPOI.POIFS.Crypt.Dsig;
 using NPOI.SS.UserModel;

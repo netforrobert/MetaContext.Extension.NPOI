@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using MetaContext.Extension.NPOI.Header;
 using MetaContext.Extension.NPOI.Reader;
 using MetaContext.Extension.NPOI.Writer;
 
@@ -34,15 +35,15 @@ public static class NPOIExtension
         int colStartIndex = 0,
         int rowIndex = 0,
         ICellStyle cellStyle = null)
+    {
+        sheetWriter.CreateHeader(header =>
         {
-            sheetWriter.CreateHeader(header=>
-            {
-                foreach (var headerCol in headerCols)
-                    header.Cell(headerCol);
-            },
-            colStartIndex,
-            rowIndex,
-            cellStyle);
-            return sheetWriter;
-        }
+            foreach (var headerCol in headerCols)
+                header.Cell(headerCol);
+        },
+        colStartIndex,
+        rowIndex,
+        cellStyle);
+        return sheetWriter;
+    }
 }
