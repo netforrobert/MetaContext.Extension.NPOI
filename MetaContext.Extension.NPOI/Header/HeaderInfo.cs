@@ -1,6 +1,6 @@
 ﻿namespace MetaContext.Extension.NPOI.Header;
 
-internal class HeaderInfo : IHeaderInfo
+public record HeaderInfo
 {
     public HeaderInfo(IHeaderCell headerCell)
     {
@@ -20,4 +20,7 @@ internal class HeaderInfo : IHeaderInfo
     public int Columns { get; private set; }
 
     public string HeaderText { get; private set; }
+
+    public override string ToString()
+        => $"{HeaderText}({RowIndex},{Rows},{ColumnIndex},{Columns})";
 }

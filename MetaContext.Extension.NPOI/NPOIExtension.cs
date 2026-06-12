@@ -17,11 +17,12 @@ public static class NPOIExtension
         => new SheetWriter(sheet);
 
     public static ISheetReader UseSheetReader(this ISheet sheet,
+        IEnumerable<HeaderInfo> headers,
         Action<IReaderErrorMessageConfig> msgConfigAction = null)
     {
         ReaderErrorMessageProvider provider = new();
         msgConfigAction?.Invoke(provider);
-        return new SheetReader(sheet, provider);
+        return new SheetReader(sheet, headers, provider);
     }
 
     public static string GetUppercaseLetter(this int index)

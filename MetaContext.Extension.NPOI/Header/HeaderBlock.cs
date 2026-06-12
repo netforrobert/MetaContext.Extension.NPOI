@@ -50,8 +50,9 @@ internal class HeaderBlock : IHeaderBlock
                 _ => _blocks.Select(p => p.Rows).Max()
             };
 
-            return Math.Max(cellsRows, blocksRows)
-                + _titleText == null ? 0 : 1;
+            var rows = Math.Max(cellsRows, blocksRows)
+                + (_titleText == null ? 0 : 1);
+            return rows;
         }
     }
 

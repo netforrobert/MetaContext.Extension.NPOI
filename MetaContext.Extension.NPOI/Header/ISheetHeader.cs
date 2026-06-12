@@ -17,7 +17,7 @@ public interface ISheetHeader
 
     IEnumerable<string> HeaderTexts { get; }
 
-    IEnumerable<IHeaderInfo> Headers { get; }
+    IEnumerable<HeaderInfo> Headers { get; }
 
     ISheetHeader Block(string text, 
         Action<IHeaderBlock> action, 

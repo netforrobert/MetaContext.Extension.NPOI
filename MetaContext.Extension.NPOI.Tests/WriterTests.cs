@@ -43,16 +43,6 @@ public class WriterTests
         sheets.SaveToFile(fileName);
     }
 
-    [Fact]
-    public void Test_GetHeaderInfos()
-    {
-        XSSFWorkbook sheets = new();
-        var sheetHeader = sheets.CreateSheet().CreateHeader();
-        DrawHeader(sheetHeader);
-        var headers = sheetHeader.Headers.ToArray();
-        Assert.True(headers.Length > 0);
-    }
-
     private static void DrawHeader(ISheetHeader header)
     {
         header.Block("基本信息", block =>

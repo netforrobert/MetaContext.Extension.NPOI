@@ -48,11 +48,11 @@ internal class SheetHeader : ISheetHeader
     public IEnumerable<string> HeaderTexts
         => _blocks.SelectMany(p => p.Cells).Select(p => p.HeaderText);
 
-    public IEnumerable<IHeaderInfo> Headers
+    public IEnumerable<HeaderInfo> Headers
     {
         get
         {
-            static IEnumerable<IHeaderInfo> EachBlock(IHeaderBlock block)
+            static IEnumerable<HeaderInfo> EachBlock(IHeaderBlock block)
             {
                 if (block.Title != null)
                     yield return new HeaderInfo(block.Title);

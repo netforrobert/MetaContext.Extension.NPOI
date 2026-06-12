@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using MetaContext.Extension.NPOI.ColumnIndex;
+using MetaContext.Extension.NPOI.Header;
 
 using NPOI.SS.UserModel;
 
@@ -10,34 +11,30 @@ namespace MetaContext.Extension.NPOI.Reader;
 
 internal class SheetReader : ISheetReader
 {
-    private readonly List<IHeaderVerifier> _headerVerifiers = new();
     private IRowVerifier _rowVerifier;
     private readonly ISheet _sheet;
+    private readonly IEnumerable<HeaderInfo> _headers;
     private readonly IReaderErrorMessageProvider _messageProvider;
+    private readonly ColumnIndices _columnIndices;
 
     public SheetReader(ISheet sheet, 
+        IEnumerable<HeaderInfo> headers,
         IReaderErrorMessageProvider messageProvider)
     {
         _sheet = sheet;
+        _headers = headers;
         _messageProvider = messageProvider;
+
+        int rowIndex = _headers.Select(p => p.RowIndex).Max();
+        var cols = _headers.Where(p => p.RowIndex == rowIndex)
+            .Select(p => p.HeaderText).ToArray();
+        _columnIndices = new(cols);
     }
 
     public ISheetReader UseValidation(Action<IRowVerifier> action)
     {
-        if (LastHeader == null)
-            throw new NotSupportedException("未验证表头");
-
-        _rowVerifier ??= new RowVerifier(LastHeader, _messageProvider);
+        _rowVerifier ??= new RowVerifier(_columnIndices, _messageProvider);
         action(_rowVerifier);
-        return this;
-    }
-
-    public ISheetReader VerifyHeader(string[] headers, 
-        int rowIndex, 
-        int startColIndex)
-    {
-        var headerVerifier = new HeaderVerifier(rowIndex, new ColumnIndices(headers, startColIndex));
-        _headerVerifiers.Add(headerVerifier);
         return this;
     }
 
@@ -59,30 +56,38 @@ internal class SheetReader : ISheetReader
         int startColIndex = 0,
         Action<ITargetObjectVerifier<TTargetObject>> objectVerify = null)
     {
-        var enumerator = _headerVerifiers.GetEnumerator();
         //处理表头校验
-        while (enumerator.MoveNext())
+        var headerRowIndices = _headers.Select(p => p.RowIndex).Distinct().OrderBy(p => p).ToArray();
+        foreach (var headerRowIndex in headerRowIndices)
         {
-            var headerVerifer = enumerator.Current;
-            var headerRow = _sheet.GetRow(headerVerifer.RowIndex);
+            var headerRow = _sheet.GetRow(headerRowIndex);
             if (headerRow == null)
             {
                 string message = _messageProvider.GetMessageValue<string>(nameof(IReaderErrorMessageConfig.NullHeader));
-                return new ReadResult<TTargetObject>(new(headerVerifer.RowIndex, message));
+                return new ReadResult<TTargetObject>(new(headerRowIndex, message));
             }
 
-            var errorHeaderInfo = headerVerifer.Verify(headerRow);
-            if (errorHeaderInfo.IsError)
+            var headers = _headers.Where(p => p.RowIndex == headerRowIndex);
+            List<ErrorHeaderItem> errorHeaderItems = new();
+            foreach (var header in headers)
+            {
+                if (string.IsNullOrEmpty(header.HeaderText))
+                    continue;
+
+                string text = headerRow.GetCell(header.ColumnIndex)?.ToString();
+                
+                if (header.HeaderText != text)
+                    errorHeaderItems.Add(new(header.ColumnIndex, header.HeaderText, text));
+            }
+
+            if (errorHeaderItems.Count > 0)
             {
                 Func<IEnumerable<ErrorHeaderItem>, List<string>> messageFactory = _messageProvider
                     .GetMessageValue<Func<IEnumerable<ErrorHeaderItem>, List<string>>>(nameof(IReaderErrorMessageConfig.ErrorHeaders));
-                ErrowRowInfo errowRowInfo = new(headerVerifer.RowIndex, messageFactory(errorHeaderInfo.ErrorItems));
+                ErrowRowInfo errowRowInfo = new(headerRowIndex, messageFactory(errorHeaderItems));
                 return new ReadResult<TTargetObject>(errowRowInfo);
             }
         }
-
-        if (LastHeader == null)
-            throw new NotSupportedException("未验证表头");
 
         List<ErrowRowInfo> errowRowInfos = new();
         List<TTargetObject> targetObjects = new();
@@ -106,7 +111,7 @@ internal class SheetReader : ISheetReader
                 errowRowInfos.Add(errInfo);
                 continue;
             }
-            TTargetObject targetObject = targetFactory(new RowReader(row, LastHeader));
+            TTargetObject targetObject = targetFactory(new RowReader(row, _columnIndices));
             //校验对象
             if (objectVerifier.TryVerify(targetObject, out string message))
             {
@@ -123,9 +128,4 @@ internal class SheetReader : ISheetReader
             successedCount,
             errowRowInfos);
     }
-
-    private ColumnIndices LastHeader
-        => _headerVerifiers.OrderByDescending(p => p.RowIndex)
-        .Select(p => p.ColIndices)
-        .FirstOrDefault();
 }

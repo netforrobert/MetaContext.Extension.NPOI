@@ -1,13 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+
+using MetaContext.Extension.NPOI.Header;
+
+using NPOI.SS.UserModel;
 
 namespace MetaContext.Extension.NPOI.Reader;
 
 public interface ISheetReader
 {
-    ISheetReader VerifyHeader(string[] headers, 
-        int rowIndex = 0,
-        int startColIndex = 0);
-
     ISheetReader UseValidation(Action<IRowVerifier> action);
 
     ReadResult<TTargetObject> Read<TTargetObject>(Action<IRowReader<TTargetObject>> readerAction,
