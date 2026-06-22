@@ -2,7 +2,7 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <LangVersion>10.0</LangVersion>
-        <Version>1.0.0-alpha1.10.5</Version>
+        <Version>1.0.0-alpha1.10.6</Version>
         <PackageId>MetaContext.Extension.NPOI</PackageId>
         <Authors>netforrobert</Authors>
         <Description>一个NPOI的扩展包。</Description>
