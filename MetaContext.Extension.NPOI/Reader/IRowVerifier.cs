@@ -14,6 +14,4 @@ public interface IRowVerifier
         int index = 0);
 
     IRowVerifier VerifyRow(Action<IRowValidation> action);
-
-    ErrowRowInfo RunVerify(IRow row);
 }

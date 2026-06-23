@@ -4,10 +4,13 @@ namespace MetaContext.Extension.NPOI.Reader;
 
 public interface IRowValidation
 {
-    IRowValidation PickValue<TValue>(string column, 
-        int index = 0,
-        Func<string, TValue> valueFactory = null);
-
-    void UseValuesVerify(Func<object[], bool> verifyFunc, 
-        Func<object[], string> errTextFactory);
+    /// <summary>
+    /// 使用组合验证
+    /// </summary>
+    /// <param name="verfierfunc">验证委托</param>
+    /// <param name="messageFactory">消息委托</param>
+    /// <param name="isAbortReading">是否终断读取</param>
+    void UseValuesVerify(Func<IRowReader, ValidationResult> verfierfunc,
+        Func<IRowReader, object[], string> messageFactory,
+        bool isAbortReading = false);
 }

@@ -29,4 +29,12 @@ public static class ReaderExtension
 
         return (TValue)tagValue;
     }
+
+    public static TValue Read<TValue>(this IRowReader reader, 
+        string column, 
+        int index = 0)
+    {
+        string text = reader.Read(column, index);
+        return text.ParseToValue<TValue>();
+    }
 }

@@ -32,18 +32,25 @@ public class ReadResult<TTargetObject>
 
 public record ErrowRowInfo
 {
-    public ErrowRowInfo(int rowNo, List<string> errMessages)
+    public ErrowRowInfo(int rowNo, 
+        List<string> errMessages,
+        bool isAbortReading = false)
     {
         RowNo = rowNo;
         ErrMessages = errMessages.AsReadOnly();
+        IsAbortReading = isAbortReading;
     }
 
-    public ErrowRowInfo(int rowNo, string errMessage) 
-        : this(rowNo, new List<string> { errMessage })
+    public ErrowRowInfo(int rowNo, 
+        string errMessage, 
+        bool isAbortReading = false) 
+        : this(rowNo, new List<string> { errMessage }, isAbortReading)
     { 
     }
 
     public int RowNo { get; private set; }
 
     public IReadOnlyCollection<string> ErrMessages { get; private set; }
+
+    public bool IsAbortReading { get; private set; }
 }

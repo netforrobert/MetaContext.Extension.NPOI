@@ -11,7 +11,7 @@ namespace MetaContext.Extension.NPOI.Reader;
 
 internal class SheetReader : ISheetReader
 {
-    private IRowVerifier _rowVerifier;
+    private RowVerifier _rowVerifier;
     private readonly ISheet _sheet;
     private readonly IEnumerable<HeaderInfo> _headers;
     private readonly IReaderErrorMessageProvider _messageProvider;

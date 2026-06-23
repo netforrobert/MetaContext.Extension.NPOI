@@ -78,23 +78,24 @@ public class RowVerifier : IRowVerifier
             return new ErrowRowInfo(row.RowNum + 1, errorMessages);
 
         //行验证
+        bool isBreakLoop = false;
         foreach (var rowValidation in _rowValidations)
         {
-            if (rowValidation.IsErrorRow(rowReader, out string errMessage))
+            (bool isInvalid, isBreakLoop) = rowValidation.IsErrorRow(rowReader, out string errMessage);
+            if (isInvalid)
             {
                 errorMessages.Add(errMessage);
                 break;
             }
         }
 
-        return new ErrowRowInfo(row.RowNum + 1, errorMessages);
+        return new ErrowRowInfo(row.RowNum + 1, errorMessages, isBreakLoop);
     }
 
     public IRowVerifier VerifyRow(Action<IRowValidation> action)
     {
         RowValidation validation = new();
         action(validation);
-        validation.VerifySelf();
         _rowValidations.Add(validation);
         return this;
     }
