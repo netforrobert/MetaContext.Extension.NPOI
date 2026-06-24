@@ -106,9 +106,13 @@ internal class SheetReader : ISheetReader
             processedCount++;
             //校验行
             var errInfo = _rowVerifier.RunVerify(row);
+            int errsCount = errInfo.ErrMessages.Count;
             if (errInfo.ErrMessages.Count > 0)
             {
                 errowRowInfos.Add(errInfo);
+                if (errInfo.IsAbortReading)
+                    break;
+
                 continue;
             }
             TTargetObject targetObject = targetFactory(new RowReader(row, _columnIndices));
