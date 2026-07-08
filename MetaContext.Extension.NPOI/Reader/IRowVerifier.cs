@@ -13,5 +13,5 @@ public interface IRowVerifier
         Func<string, string> errTextFunc,
         int index = 0);
 
-    IRowVerifier VerifyRow(Action<IRowValidation> action);
+    IRowVerifier VerifyRow(Action<IColumnsVerifier> action);
 }

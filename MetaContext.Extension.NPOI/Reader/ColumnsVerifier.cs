@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MetaContext.Extension.NPOI.Reader;
 
-internal class RowValidation : IRowValidation
+internal class ColumnsVerifier : IColumnsVerifier
 {
     private readonly List<Tuple<Func<IRowReader, ValidationResult>, Func<IRowReader, object[], string>, bool>> _verifiers = new();
 

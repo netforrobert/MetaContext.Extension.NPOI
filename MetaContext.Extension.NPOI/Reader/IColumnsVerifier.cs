@@ -2,7 +2,7 @@
 
 namespace MetaContext.Extension.NPOI.Reader;
 
-public interface IRowValidation
+public interface IColumnsVerifier
 {
     /// <summary>
     /// 使用组合验证

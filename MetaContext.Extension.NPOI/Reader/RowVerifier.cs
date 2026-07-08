@@ -13,7 +13,7 @@ public class RowVerifier : IRowVerifier
 {
     private readonly Dictionary<ColKey, List<ColumnVerifier>> _columnVerifiers = new();
     private readonly HashSet<ColKey> _notRequireColKeys = new();
-    private readonly List<RowValidation> _rowValidations = new();
+    private readonly List<ColumnsVerifier> _rowValidations = new();
     private readonly ColumnIndices _columnIndices;
     private readonly IReaderErrorMessageProvider _messageProvider;
 
@@ -92,9 +92,9 @@ public class RowVerifier : IRowVerifier
         return new ErrowRowInfo(row.RowNum + 1, errorMessages, isBreakLoop);
     }
 
-    public IRowVerifier VerifyRow(Action<IRowValidation> action)
+    public IRowVerifier VerifyRow(Action<IColumnsVerifier> action)
     {
-        RowValidation validation = new();
+        ColumnsVerifier validation = new();
         action(validation);
         _rowValidations.Add(validation);
         return this;
