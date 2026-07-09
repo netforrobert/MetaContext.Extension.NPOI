@@ -4,6 +4,7 @@ using System.Linq;
 
 using MetaContext.Extension.NPOI.ColumnIndex;
 using MetaContext.Extension.NPOI.Header;
+using MetaContext.Extension.NPOI.Reader.Validations;
 
 using NPOI.SS.UserModel;
 
@@ -117,9 +118,13 @@ internal class SheetReader : ISheetReader
             }
             TTargetObject targetObject = targetFactory(new RowReader(row, _columnIndices));
             //校验对象
-            if (objectVerifier.TryVerify(targetObject, out string message))
+            (bool isInvalid, bool isAbortReading) = objectVerifier.TryVerify(targetObject, out string message);
+            if (isInvalid)
             {
                 errowRowInfos.Add(new(rowIndex + 1, message));
+                if (isAbortReading)
+                    break;
+
                 continue;
             }
 

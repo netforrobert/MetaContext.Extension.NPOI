@@ -1,50 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using MetaContext.Extension.NPOI.ColumnIndex;
 
-using NPOI.SS.Formula.PTG;
 using NPOI.SS.UserModel;
 
-namespace MetaContext.Extension.NPOI.Reader;
+namespace MetaContext.Extension.NPOI.Reader.Validations;
 
-public class RowVerifier : IRowVerifier
+internal class ColumnVerifier : IColumnVerifier
 {
-    private readonly Dictionary<ColKey, List<ColumnVerifier>> _columnVerifiers = new();
+    private readonly Dictionary<ColKey, List<ColumnVerifierItem>> _columnVerifiers = new();
     private readonly HashSet<ColKey> _notRequireColKeys = new();
-    private readonly List<ColumnsVerifier> _rowValidations = new();
-    private readonly ColumnIndices _columnIndices;
     private readonly IReaderErrorMessageProvider _messageProvider;
+    private readonly ColumnIndices _columnIndices;
 
-    public RowVerifier(ColumnIndices columnIndices, 
+    public ColumnVerifier(ColumnIndices columnIndices, 
         IReaderErrorMessageProvider messageProvider)
     {
         _columnIndices = columnIndices;
         _messageProvider = messageProvider;
     }
 
-    public IRowVerifier NotRequireColumn(string columnm,
-        int index)
+    public IColumnVerifier NotRequire(string columnm, int index = 0)
     {
         _notRequireColKeys.Add(new(columnm, index));
         return this;
     }
 
-    public IRowVerifier VerifyColumn(string column, 
+    public IColumnVerifier Verify(string column, 
         Func<string, bool> verifyFunc, 
         Func<string, string> errTextFunc, 
         int index = 0)
     {
         ColKey colKey = new(column, index);
         if (!_columnVerifiers.ContainsKey(colKey))
-            _columnVerifiers[colKey] = new List<ColumnVerifier>();
+            _columnVerifiers[colKey] = new List<ColumnVerifierItem>();
 
         _columnVerifiers[colKey].Add(new(verifyFunc, errTextFunc));
         return this;
     }
 
-    public ErrowRowInfo RunVerify(IRow row)
+    public string[] RunVerify(IRow row)
     {
         var rowReader = new RowReader(row, _columnIndices);
         List<string> errorMessages = new();
@@ -74,43 +70,6 @@ public class RowVerifier : IRowVerifier
             }
         }
 
-        if (errorMessages.Count > 0) 
-            return new ErrowRowInfo(row.RowNum + 1, errorMessages);
-
-        //行验证
-        bool isBreakLoop = false;
-        foreach (var rowValidation in _rowValidations)
-        {
-            (bool isInvalid, isBreakLoop) = rowValidation.IsErrorRow(rowReader, out string errMessage);
-            if (isInvalid)
-            {
-                errorMessages.Add(errMessage);
-                break;
-            }
-        }
-
-        return new ErrowRowInfo(row.RowNum + 1, errorMessages, isBreakLoop);
-    }
-
-    public IRowVerifier VerifyRow(Action<IColumnsVerifier> action)
-    {
-        ColumnsVerifier validation = new();
-        action(validation);
-        _rowValidations.Add(validation);
-        return this;
-    }
-
-    private class ColumnVerifier
-    {
-        public ColumnVerifier(Func<string, bool> verifyFunc,
-            Func<string, string> errTextFunc)
-        {
-            VerifyFunc = verifyFunc;
-            ErrTextFunc = errTextFunc;
-        }
-
-        public Func<string, bool> VerifyFunc { get; private set; }
-
-        public Func<string, string> ErrTextFunc { get; private set; }
+        return errorMessages.ToArray();
     }
 }

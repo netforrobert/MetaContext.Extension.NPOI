@@ -1,6 +1,7 @@
 ﻿using System;
 
 using MetaContext.Extension.NPOI.Header;
+using MetaContext.Extension.NPOI.Reader.Validations;
 
 using NPOI.SS.UserModel;
 
@@ -12,5 +13,7 @@ public interface IObjectsReader<TTargetObject>
 
     void UseObjectValidations(Action<ITargetObjectVerifier<TTargetObject>> action);
 
-    ReadResult <TTargetObject> Read();
+    ReadResult<TTargetObject> Read(Action<TTargetObject> extraAction = null,
+        int startRowIndex = -1,
+        int startColIndex = 0);
 }

@@ -1,20 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace MetaContext.Extension.NPOI.Reader;
+using Org.BouncyCastle.Crypto;
+
+namespace MetaContext.Extension.NPOI.Reader.Validations;
 
 internal class TargetObjectVerifier<TTargetObject> : ITargetObjectVerifier<TTargetObject>, IObjectVerifier
 {
-    private readonly List<Tuple<Func<TTargetObject, ValidationResult>, Func<TTargetObject, object[], string>>> _verifiers = new();
+    private readonly List<Tuple<Func<TTargetObject, ValidationResult>, Func<TTargetObject, object[], string>, bool>> _verifiers = new();
 
     public ITargetObjectVerifier<TTargetObject> VerifyObject(Func<TTargetObject, ValidationResult> verifyFunc,
-        Func<TTargetObject, object[], string> stringFactory)
+        Func<TTargetObject, object[], string> stringFactory,
+        bool IsAbortReading)
     {
-        _verifiers.Add(new(verifyFunc, stringFactory));
+        _verifiers.Add(new(verifyFunc, stringFactory, IsAbortReading));
         return this;
     }
 
-    public bool TryVerify(object targetObj, out string message)
+    public (bool isInvalid, bool isAbortReading) TryVerify(object targetObj, out string message)
     {
         TTargetObject targetObject = (TTargetObject)targetObj;
         var enumerator = _verifiers.GetEnumerator();
@@ -25,11 +28,11 @@ internal class TargetObjectVerifier<TTargetObject> : ITargetObjectVerifier<TTarg
             if (result.IsSuccess)
             {
                 message = verifier.Item2.Invoke(targetObject, result.Arguments);
-                return true;
+                return (true, verifier.Item3);
             }
         }
 
         message = null;
-        return false;
+        return (false, false);
     }
 }
