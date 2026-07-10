@@ -26,5 +26,5 @@ public interface IRowsWriter<TData>
         Func<TData, TProperty> propertyFactory,
         int headerIndex = 0);
 
-    IRowsWriter<TData> ExtraSet(Action<IRowSetter, TData> extraAction);
+    IRowsWriter<TData> Populate(Action<IRowSetter, TData> extraAction);
 }

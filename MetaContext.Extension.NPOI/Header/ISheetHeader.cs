@@ -15,8 +15,6 @@ public interface ISheetHeader
 
     int Columns { get; }
 
-    IEnumerable<string> HeaderTexts { get; }
-
     IEnumerable<HeaderInfo> Headers { get; }
 
     ISheetHeader Block(string text, 

@@ -30,10 +30,7 @@ public abstract class ObjectsReader<TTargetObject> : IObjectsReader<TTargetObjec
         _sheet = sheet;
         _headers = headers;
 
-        int rowIndex = _headers.Select(p => p.RowIndex).Max();
-        var cols = _headers.Where(p => p.RowIndex == rowIndex)
-            .Select(p => p.HeaderText).ToArray();
-        _columnIndices = new(cols);
+        _columnIndices = new(headers);
         _rowVerifier = new(_columnIndices, _errorMessageProvider);
         ConfigErrorMessage(_errorMessageProvider);
     }
@@ -114,7 +111,7 @@ public abstract class ObjectsReader<TTargetObject> : IObjectsReader<TTargetObjec
 
             var objReader = new RowReader<TTargetObject>();
             var rowReader = new RowReader(row, _columnIndices);
-            ReadTargetObject(objReader);
+            ConfigTargetObjectReader(objReader);
             var targetObject = objReader.Read(rowReader);
             extraAction?.Invoke(targetObject);
 
@@ -151,7 +148,7 @@ public abstract class ObjectsReader<TTargetObject> : IObjectsReader<TTargetObjec
 
     protected abstract void ColumnsVerify(IColumnsVerifier columnsVerifier);
 
-    protected abstract void ReadTargetObject(IRowReader<TTargetObject> rowReader);
+    protected abstract void ConfigTargetObjectReader(IRowReader<TTargetObject> rowReader);
 
     protected virtual void TTargetObjectVerify(ITargetObjectVerifier<TTargetObject> objectVerifier)
     { 

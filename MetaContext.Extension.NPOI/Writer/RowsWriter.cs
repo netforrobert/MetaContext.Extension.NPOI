@@ -28,7 +28,7 @@ internal class RowsWriter<TData> : IRowsWriter<TData>
 
     public int StartRowIndex { get; private set; }
 
-    public IRowsWriter<TData> ExtraSet(Action<IRowSetter, TData> extraAction)
+    public IRowsWriter<TData> Populate(Action<IRowSetter, TData> extraAction)
     {
         extraAction.Invoke(_rowSetter, _sourceObject);
         return this;

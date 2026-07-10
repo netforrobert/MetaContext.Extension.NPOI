@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using NPOI.SS.UserModel;
 
@@ -26,5 +27,15 @@ public static class HeaderExtension
         var header = new SheetHeader(sheet, rowIndex, colStartIndex, null);
         action(header);
         return header.Headers;
+    }
+
+    public static IEnumerable<HeaderInfo> GetBottomHeaders(this IEnumerable<HeaderInfo> headers)
+    {
+        var colIndexGroups = headers.GroupBy(p => p.ColumnIndex);
+        foreach (var colIndexGroup in colIndexGroups)
+        {
+            var bottomHeader = colIndexGroup.OrderByDescending(p => p.RowIndex).FirstOrDefault();
+            yield return bottomHeader;
+        }
     }
 }

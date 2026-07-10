@@ -29,7 +29,7 @@ internal class SheetReader : ISheetReader
         int rowIndex = _headers.Select(p => p.RowIndex).Max();
         var cols = _headers.Where(p => p.RowIndex == rowIndex)
             .Select(p => p.HeaderText).ToArray();
-        _columnIndices = new(cols);
+        _columnIndices = new(headers);
     }
 
     public ISheetReader UseValidation(Action<IRowVerifier> action)
@@ -45,7 +45,7 @@ internal class SheetReader : ISheetReader
         Action<ITargetObjectVerifier<TTargetObject>> objectVerify = null)
         where TTargetObject : class, new()
     {
-        IRowReader<TTargetObject> rowTReader = new RowReader<TTargetObject>();
+        var rowTReader = new RowReader<TTargetObject>();
         readerAction(rowTReader);
 
         TTargetObject ObjectFactory(IRowReader rowReader) => rowTReader.Read(rowReader);

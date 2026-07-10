@@ -10,10 +10,10 @@ namespace MetaContext.Extension.NPOI.Writer;
 internal class RowSetter : IRowSetter
 {
     private readonly IRow _row;
-    private readonly ColumnIndices _colIndexs;
+    private readonly IColumnIndices _colIndexs;
 
     public RowSetter(IRow row,
-        ColumnIndices colIndexs,
+        IColumnIndices colIndexs,
         int rows = 1)
     {
         _row = row;
@@ -23,14 +23,14 @@ internal class RowSetter : IRowSetter
 
     public int Rows { get; private set; }
 
-    public ColumnIndices ColumnIndices
+    public IColumnIndices ColumnIndices
         => _colIndexs;
 
     public ICellWriter CreaterCellWriter(string columnName, int index = 0, int cols = 1)
     {
         var colIndex = _colIndexs.GetColIndex(columnName, index)
             ?? throw new InvalidOperationException($"列名 '{columnName}' 不存在");
-        return new CellWriter(_row, colIndex.StartIndex, Rows, cols);
+        return new CellWriter(_row, colIndex.ColumnIndex, Rows, cols);
     }
 
     public IRowSetter Set<TargetValue>(string columnName, TargetValue value, int index)
@@ -38,17 +38,17 @@ internal class RowSetter : IRowSetter
         var colIndex = _colIndexs.GetColIndex(columnName, index) 
             ?? throw new InvalidOperationException($"列名 '{columnName}' 不存在");
 
-        if (colIndex.EndIndex > colIndex.StartIndex)
+        if (colIndex.Columns > 1)
         {
             //增加合并单元格
             CellRangeAddress region = new(_row.RowNum,
                 _row.RowNum,
-                colIndex.StartIndex,
-                colIndex.EndIndex);
+                colIndex.ColumnIndex,
+                colIndex.ColumnIndex + colIndex.Columns - 1);
             _row.Sheet.AddMergedRegion(region);
         }
 
-        var cell = _row.GetCell(colIndex.StartIndex) ?? _row.CreateCell(colIndex.StartIndex);
+        var cell = _row.GetCell(colIndex.ColumnIndex) ?? _row.CreateCell(colIndex.ColumnIndex);
         cell.SetTargetValue(value);
         return this;
     }

@@ -52,10 +52,7 @@ internal class SheetWriter : ISheetWriter
     {
         var lastHeader = _sheetHeaders.OrderByDescending(p => p.RowIndex)
             .FirstOrDefault() ?? throw new NotSupportedException("无法获取表头");
-        var headerColumns = lastHeader.HeaderTexts.ToArray();
-        var startColIndex = lastHeader.StartColIndex;
         PropertyGetterProvider getterProvider = new();
-
         _rowIndex = startRowIndex switch
         {
             -1 when _rowIndex == -1 => _sheetHeaders.Select(p => p.Rows).Sum(),
@@ -63,7 +60,7 @@ internal class SheetWriter : ISheetWriter
             _ => _rowIndex
         };
 
-        ColumnIndices columnIndices = new(headerColumns, startColIndex);
+        ColumnIndices columnIndices = new(lastHeader.Headers);
         foreach (var sourceObject in sourceObjects)
         {
             int rows = rowsSelector?.Invoke(sourceObject) ?? 1;
