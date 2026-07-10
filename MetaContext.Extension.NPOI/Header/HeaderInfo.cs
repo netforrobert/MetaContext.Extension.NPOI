@@ -2,6 +2,15 @@
 
 public record HeaderInfo
 {
+    public HeaderInfo(HeaderInfo header)
+    {
+        RowIndex = header.RowIndex;
+        ColumnIndex = header.ColumnIndex;
+        Rows = header.Rows;
+        Columns = header.Columns;
+        HeaderText = header.HeaderText;
+    }
+
     public HeaderInfo(IHeaderCell headerCell)
     {
         RowIndex = headerCell.RowIndex;

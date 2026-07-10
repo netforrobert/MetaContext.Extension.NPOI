@@ -6,7 +6,7 @@ public interface IRowSetter
 {
     int Rows { get; }
 
-    ColumnIndices ColumnIndices { get; }
+    IColumnIndices ColumnIndices { get; }
 
     IRowSetter Set<TargetValue>(string columnName, TargetValue value, int index = 0);
 

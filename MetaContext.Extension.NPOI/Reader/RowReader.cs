@@ -24,7 +24,7 @@ internal class RowReader : IRowReader
     {
         string key = $"{column}_{index}";
         var colIndex = _colIndexs[key];
-        return _row.GetCell(colIndex.StartIndex)?.ToString();
+        return _row.GetCell(colIndex.ColumnIndex)?.ToString();
     }
 
     public string Read(int index)

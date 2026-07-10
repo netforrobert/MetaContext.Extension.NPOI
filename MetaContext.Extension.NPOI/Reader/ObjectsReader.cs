@@ -10,53 +10,44 @@ using NPOI.SS.UserModel;
 
 namespace MetaContext.Extension.NPOI.Reader;
 
-internal class SheetReader : ISheetReader
+public abstract class ObjectsReader<TTargetObject> : IObjectsReader<TTargetObject>
+    where TTargetObject : class, new()
 {
-    private RowVerifier _rowVerifier;
+    private readonly ReaderErrorMessageProvider _errorMessageProvider = new();
+    private readonly TargetObjectVerifier<TTargetObject> _objectVerifier = new();
+    private readonly List<Action<IRowVerifier>> _appendedRowValidations = new();
+    private readonly List<Action<ITargetObjectVerifier<TTargetObject>>> _appendedObjValidations = new();
+
+    private readonly RowVerifier _rowVerifier;
     private readonly ISheet _sheet;
     private readonly IEnumerable<HeaderInfo> _headers;
-    private readonly IReaderErrorMessageProvider _messageProvider;
     private readonly ColumnIndices _columnIndices;
 
-    public SheetReader(ISheet sheet, 
-        IEnumerable<HeaderInfo> headers,
-        IReaderErrorMessageProvider messageProvider)
+
+    protected ObjectsReader(ISheet sheet,
+        IEnumerable<HeaderInfo> headers)
     {
         _sheet = sheet;
         _headers = headers;
-        _messageProvider = messageProvider;
 
-        int rowIndex = _headers.Select(p => p.RowIndex).Max();
-        var cols = _headers.Where(p => p.RowIndex == rowIndex)
-            .Select(p => p.HeaderText).ToArray();
         _columnIndices = new(headers);
+        _rowVerifier = new(_columnIndices, _errorMessageProvider);
+        ConfigErrorMessage(_errorMessageProvider);
     }
 
-    public ISheetReader UseValidation(Action<IRowVerifier> action)
+    public ReadResult<TTargetObject> Read(Action<TTargetObject> extraAction = null,
+        int startRowIndex = -1,
+        int startColIndex = 0)
     {
-        _rowVerifier ??= new RowVerifier(_columnIndices, _messageProvider);
-        action(_rowVerifier);
-        return this;
-    }
+        _rowVerifier.VerifyColumn(ColumnVerify);
+        _rowVerifier.VerifyRow(ColumnsVerify);
+        foreach (var action in _appendedRowValidations)
+            action(_rowVerifier);
 
-    public ReadResult<TTargetObject> Read<TTargetObject>(Action<IRowReader<TTargetObject>> readerAction,
-        int startRowIndex = 1, 
-        int startColIndex = 0,
-        Action<ITargetObjectVerifier<TTargetObject>> objectVerify = null)
-        where TTargetObject : class, new()
-    {
-        var rowTReader = new RowReader<TTargetObject>();
-        readerAction(rowTReader);
+        TTargetObjectVerify(_objectVerifier);
+        foreach (var action in _appendedObjValidations)
+            action(_objectVerifier);
 
-        TTargetObject ObjectFactory(IRowReader rowReader) => rowTReader.Read(rowReader);
-        return Read(ObjectFactory, startRowIndex, startColIndex, objectVerify);
-    }
-
-    public ReadResult<TTargetObject> Read<TTargetObject>(Func<IRowReader, TTargetObject> targetFactory,
-        int startRowIndex = 1, 
-        int startColIndex = 0,
-        Action<ITargetObjectVerifier<TTargetObject>> objectVerify = null)
-    {
         //处理表头校验
         var headerRowIndices = _headers.Select(p => p.RowIndex).Distinct().OrderBy(p => p).ToArray();
         foreach (var headerRowIndex in headerRowIndices)
@@ -64,7 +55,7 @@ internal class SheetReader : ISheetReader
             var headerRow = _sheet.GetRow(headerRowIndex);
             if (headerRow == null)
             {
-                string message = _messageProvider.GetMessageValue<string>(nameof(IReaderErrorMessageConfig.NullHeader));
+                string message = _errorMessageProvider.GetMessageValue<string>(nameof(IReaderErrorMessageConfig.NullHeader));
                 return new ReadResult<TTargetObject>(new(headerRowIndex, message));
             }
 
@@ -76,14 +67,14 @@ internal class SheetReader : ISheetReader
                     continue;
 
                 string text = headerRow.GetCell(header.ColumnIndex)?.ToString();
-                
+
                 if (header.HeaderText != text)
                     errorHeaderItems.Add(new(header.ColumnIndex, header.HeaderText, text));
             }
 
             if (errorHeaderItems.Count > 0)
             {
-                Func<IEnumerable<ErrorHeaderItem>, List<string>> messageFactory = _messageProvider
+                Func<IEnumerable<ErrorHeaderItem>, List<string>> messageFactory = _errorMessageProvider
                     .GetMessageValue<Func<IEnumerable<ErrorHeaderItem>, List<string>>>(nameof(IReaderErrorMessageConfig.ErrorHeaders));
                 ErrowRowInfo errowRowInfo = new(headerRowIndex, messageFactory(errorHeaderItems));
                 return new ReadResult<TTargetObject>(errowRowInfo);
@@ -94,8 +85,9 @@ internal class SheetReader : ISheetReader
         List<TTargetObject> targetObjects = new();
         int processedCount = 0;
         int successedCount = 0;
-        TargetObjectVerifier<TTargetObject> objectVerifier = new();
-        objectVerify?.Invoke(objectVerifier);
+        if (startRowIndex == -1)
+            startRowIndex = _headers.Select(p => p.RowIndex).Max() + 1;
+
         for (int rowIndex = startRowIndex; rowIndex <= _sheet.LastRowNum; rowIndex++)
         {
             var row = _sheet.GetRow(rowIndex);
@@ -116,9 +108,15 @@ internal class SheetReader : ISheetReader
 
                 continue;
             }
-            TTargetObject targetObject = targetFactory(new RowReader(row, _columnIndices));
+
+            var objReader = new RowReader<TTargetObject>();
+            var rowReader = new RowReader(row, _columnIndices);
+            ConfigTargetObjectReader(objReader);
+            var targetObject = objReader.Read(rowReader);
+            extraAction?.Invoke(targetObject);
+
             //校验对象
-            (bool isInvalid, bool isAbortReading) = objectVerifier.TryVerify(targetObject, out string message);
+            (bool isInvalid, bool isAbortReading) = _objectVerifier.TryVerify(targetObject, out string message);
             if (isInvalid)
             {
                 errowRowInfos.Add(new(rowIndex + 1, message));
@@ -136,5 +134,27 @@ internal class SheetReader : ISheetReader
             processedCount,
             successedCount,
             errowRowInfos);
+
+        throw new NotImplementedException();
+    }
+
+    public void UseObjectValidations(Action<ITargetObjectVerifier<TTargetObject>> action)
+        => _appendedObjValidations.Add(action);
+
+    public void UseRowValidations(Action<IRowVerifier> action)
+        => _appendedRowValidations.Add(action);
+
+    protected abstract void ColumnVerify(IColumnVerifier columnVerifier);
+
+    protected abstract void ColumnsVerify(IColumnsVerifier columnsVerifier);
+
+    protected abstract void ConfigTargetObjectReader(IRowReader<TTargetObject> rowReader);
+
+    protected virtual void TTargetObjectVerify(ITargetObjectVerifier<TTargetObject> objectVerifier)
+    { 
+    }
+
+    protected virtual void ConfigErrorMessage(IReaderErrorMessageConfig errorMessageConfig)
+    { 
     }
 }

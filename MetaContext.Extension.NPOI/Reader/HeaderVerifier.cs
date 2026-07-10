@@ -23,9 +23,9 @@ internal class HeaderVerifier : IHeaderVerifier
         List<ErrorHeaderItem> errorHeaders = new();
         foreach (var colIndex in ColIndices.Indices)
         {
-            string actualHeader = headerRow.GetCell(colIndex.StartIndex)?.ToString() ?? "";
-            if (actualHeader != colIndex.Name)
-                errorHeaders.Add(new(colIndex.StartIndex, colIndex.Name, actualHeader));
+            string actualHeader = headerRow.GetCell(colIndex.ColumnIndex)?.ToString() ?? "";
+            if (actualHeader != colIndex.HeaderText)
+                errorHeaders.Add(new(colIndex.ColumnIndex, colIndex.HeaderText, actualHeader));
         }
 
         return new ErrorHeaderInfo(headerRow.RowNum, errorHeaders);

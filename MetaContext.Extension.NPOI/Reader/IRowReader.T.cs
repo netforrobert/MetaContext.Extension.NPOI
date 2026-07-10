@@ -12,7 +12,5 @@ public interface IRowReader<TTargetObject>
         Func<string, TProperty> convertor = null,
         Action<TTargetObject> extraAction = null);
 
-    IRowReader<TTargetObject> Extra(Action<TTargetObject, IRowReader> action);
-
-    TTargetObject Read(IRowReader rowReader);
+    IRowReader<TTargetObject> ForProperties(Action<TTargetObject, IRowReader> action);
 }

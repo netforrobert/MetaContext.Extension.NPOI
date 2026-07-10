@@ -11,7 +11,7 @@ internal class RowReader<TTargetObject> : IRowReader<TTargetObject>
     private readonly Dictionary<ColKey, Action<TTargetObject, string>> _setActions = new();
     private readonly List<Action<TTargetObject, IRowReader>> _extraActions = new();
 
-    public IRowReader<TTargetObject> Extra(Action<TTargetObject, IRowReader> action)
+    public IRowReader<TTargetObject> ForProperties(Action<TTargetObject, IRowReader> action)
     {
         _extraActions.Add(action);
         return this;

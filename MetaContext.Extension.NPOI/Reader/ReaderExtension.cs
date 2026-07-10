@@ -1,5 +1,7 @@
 ﻿using System;
 
+using MetaContext.Extension.NPOI.Reader.Validations;
+
 namespace MetaContext.Extension.NPOI.Reader;
 
 public static class ReaderExtension
@@ -37,4 +39,16 @@ public static class ReaderExtension
         string text = reader.Read(column, index);
         return text.ParseToValue<TValue>();
     }
+
+    public static IRowVerifier VerifyColumn(this IRowVerifier rowVerifier,
+        string column,
+        Func<string, bool> verifyFunc,
+        Func<string, string> errTextFunc,
+        int index = 0)
+        => rowVerifier.VerifyColumn(col => col.Verify(column, verifyFunc, errTextFunc, index));
+
+    public static IRowVerifier NotRequireColumn(this IRowVerifier rowVerifier,
+        string columnm,
+        int index = 0)
+        => rowVerifier.VerifyColumn(col => col.NotRequire(columnm, index));
 }

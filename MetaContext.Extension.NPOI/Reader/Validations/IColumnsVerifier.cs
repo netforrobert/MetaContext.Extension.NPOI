@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace MetaContext.Extension.NPOI.Reader;
+namespace MetaContext.Extension.NPOI.Reader.Validations;
 
-public interface IRowValidation
+public interface IColumnsVerifier
 {
     /// <summary>
     /// 使用组合验证

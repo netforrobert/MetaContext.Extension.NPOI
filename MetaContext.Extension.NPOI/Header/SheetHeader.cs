@@ -45,9 +45,6 @@ internal class SheetHeader : ISheetHeader
     public int Columns
         => _blocks.Select(p => p.Columns).Sum();
 
-    public IEnumerable<string> HeaderTexts
-        => _blocks.SelectMany(p => p.Cells).Select(p => p.HeaderText);
-
     public IEnumerable<HeaderInfo> Headers
     {
         get

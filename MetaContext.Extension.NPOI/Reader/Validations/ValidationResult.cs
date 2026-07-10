@@ -1,4 +1,4 @@
-﻿namespace MetaContext.Extension.NPOI.Reader;
+﻿namespace MetaContext.Extension.NPOI.Reader.Validations;
 
 public class ValidationResult
 {
