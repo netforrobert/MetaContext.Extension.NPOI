@@ -51,4 +51,17 @@ public static class ReaderExtension
         string columnm,
         int index = 0)
         => rowVerifier.VerifyColumn(col => col.NotRequire(columnm, index));
+
+    public static IColumnVerifier VerifyColumns(this IColumnVerifier columnVerifier, 
+        Func<string, bool> verifyFunc,
+        Func<string, string, string> errTextFunc,
+        params string[] columns)
+    {
+        foreach (var column in columns)
+        {
+            columnVerifier.Verify(column, verifyFunc, x => errTextFunc(x, column));
+        }
+
+        return columnVerifier;
+    }
 }

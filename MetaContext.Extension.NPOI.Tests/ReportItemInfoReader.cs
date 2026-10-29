@@ -24,8 +24,12 @@ public class ReportItemInfoReader : ObjectsReader<ReportItemInfo>
         //同名列数据有效性校验
         for (int i = 0; i < 4; i++)
         {
-            columnVerifier.Verify("销售额", x => !decimal.TryParse(x, out _), x => $"销售额：'{x}' 无效", i)
-                .Verify("利润", x => !decimal.TryParse(x, out _), x => $"利润：'{x}' 无效");
+            //columnVerifier.Verify("销售额", x => !decimal.TryParse(x, out _), x => $"销售额：'{x}' 无效", i)
+            //    .Verify("利润", x => !decimal.TryParse(x, out _), x => $"利润：'{x}' 无效");
+
+            columnVerifier.VerifyColumns(x => !decimal.TryParse(x, out _),
+                (x, h) => $"{h} '{x}' 无效",
+                "利润", "销售额");
         }
         columnVerifier.NotRequire("备注");
     }
