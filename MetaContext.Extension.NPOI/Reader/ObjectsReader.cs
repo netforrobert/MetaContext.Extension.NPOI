@@ -40,6 +40,7 @@ public abstract class ObjectsReader<TTargetObject> : IObjectsReader<TTargetObjec
         int startColIndex = 0)
     {
         _rowVerifier.VerifyColumn(ColumnVerify);
+        _rowVerifier.VerifyColumns(ColumnValidate);
         _rowVerifier.VerifyRow(ColumnsVerify);
         foreach (var action in _appendedRowValidations)
             action(_rowVerifier);
@@ -134,8 +135,6 @@ public abstract class ObjectsReader<TTargetObject> : IObjectsReader<TTargetObjec
             processedCount,
             successedCount,
             errowRowInfos);
-
-        throw new NotImplementedException();
     }
 
     public void UseObjectValidations(Action<ITargetObjectVerifier<TTargetObject>> action)
@@ -144,7 +143,12 @@ public abstract class ObjectsReader<TTargetObject> : IObjectsReader<TTargetObjec
     public void UseRowValidations(Action<IRowVerifier> action)
         => _appendedRowValidations.Add(action);
 
-    protected abstract void ColumnVerify(IColumnVerifier columnVerifier);
+    [Obsolete("已废弃，请使用ColumnValidate代替")]
+    protected virtual void ColumnVerify(IColumnVerifier columnVerifier)
+    { 
+    }
+
+    protected abstract void ColumnValidate(IColumnValidation columnValidation);
 
     protected abstract void ColumnsVerify(IColumnsVerifier columnsVerifier);
 

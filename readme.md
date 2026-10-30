@@ -145,20 +145,26 @@ public class ReportItemInfoReader : ObjectsReader<ReportItemInfo>
         : base(sheet, headers)
     {
     }
-
-    protected override void ColumnVerify(IColumnVerifier columnVerifier)
+    
+    protected override void ColumnValidate(IColumnValidation validation)
     {
-        //单列校验
-        columnVerifier.Verify("员工ID", x => x.Length > 50, x => $"员工ID：'{x}' 长度超过了50")
-            .Verify("部门", x => x != "销售部", x => $"部门 '{x}' 无效")
-            .Verify("入职日期", x => !DateTime.TryParse(x, out _), x => $"入职日期：'{x}' 无效");
-        //同名列数据有效性校验
+        validation.ColVerify("员工ID", 
+            col => col.Verify(x => x.Length > 50, args => $"员工ID：'{args.Value}' 长度超过了50"));
+        validation.ColVerify("部门", 
+            col => col.Verify(x => x != "销售部", args => $"部门 '{args.Value}' 无效"));
+        validation.ColVerify("入职日期", 
+            col => col.Verify(x => !DateTime.TryParse(x, out _), 
+            args => $"入职日期：'{args.Value}' 无效"));
+
         for (int i = 0; i < 4; i++)
         {
-            columnVerifier.Verify("销售额", x => !decimal.TryParse(x, out _), x => $"销售额：'{x}' 无效", i)
-                .Verify("利润", x => !decimal.TryParse(x, out _), x => $"利润：'{x}' 无效");
+            validation.ColsVerify(col 
+                => col.Verify(x => !decimal.TryParse(x, out _), arg => $"{arg.ColKey.Column} '{arg.Value}' 无效"), 
+                index: i,
+                "销售额", "利润");
         }
-        columnVerifier.NotRequire("备注");
+
+        validation.ColVerify("备注", col => col.NotRequired());
     }
 
     protected override void ColumnsVerify(IColumnsVerifier columnsVerifier)

@@ -40,6 +40,13 @@ public static class ReaderExtension
         return text.ParseToValue<TValue>();
     }
 
+    public static TValue Read<TValue>(this IRowReader reader,
+        ColKey colKey)
+    {
+        string text = reader.Read(colKey.Column, colKey.Index);
+        return text.ParseToValue<TValue>();
+    }
+
     public static IRowVerifier VerifyColumn(this IRowVerifier rowVerifier,
         string column,
         Func<string, bool> verifyFunc,
@@ -52,6 +59,7 @@ public static class ReaderExtension
         int index = 0)
         => rowVerifier.VerifyColumn(col => col.NotRequire(columnm, index));
 
+    [Obsolete("已废弃")]
     public static IColumnVerifier VerifyColumns(this IColumnVerifier columnVerifier, 
         Func<string, bool> verifyFunc,
         Func<string, string, string> errTextFunc,
@@ -63,6 +71,7 @@ public static class ReaderExtension
         return columnVerifier;
     }
 
+    [Obsolete("已废弃")]
     public static IColumnVerifier NotRequireColumns(this IColumnVerifier columnVerifier,
         params string[] columns)
     {
@@ -70,5 +79,16 @@ public static class ReaderExtension
             columnVerifier.NotRequire(column);
 
         return columnVerifier;
+    }
+
+    public static void ColsVerify(this IColumnValidation validation,
+        Action<IColVerifier> action,
+        int index = 0,
+        params string[] columns)
+    {
+        foreach (var column in columns)
+        {
+            validation.ColVerify(column, action, index);
+        }
     }
 }

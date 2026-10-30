@@ -14,12 +14,14 @@ internal class RowVerifier : IRowVerifier
     private readonly List<ColumnsVerifier> _rowValidations = new();
     private readonly ColumnIndices _columnIndices;
     private readonly ColumnVerifier _columnVerifier;
+    private readonly ColumnValidation _columnValidation;
 
     public RowVerifier(ColumnIndices columnIndices,
         IReaderErrorMessageProvider messageProvider)
     {
         _columnIndices = columnIndices;
         _columnVerifier = new(columnIndices, messageProvider);
+        _columnValidation = new(messageProvider);
     }
 
     public IRowVerifier VerifyColumn(Action<IColumnVerifier> action)
@@ -32,6 +34,8 @@ internal class RowVerifier : IRowVerifier
     {
         var rowReader = new RowReader(row, _columnIndices);
         var errorMessages = _columnVerifier.RunVerify(row).ToList();
+        var invalidMsg = _columnValidation.GetInvalidMessage(rowReader).ToArray();
+        errorMessages.AddRange(invalidMsg);
         if (errorMessages.Count > 0) 
             return new ErrowRowInfo(row.RowNum + 1, errorMessages.ToList());
 
@@ -55,6 +59,12 @@ internal class RowVerifier : IRowVerifier
         ColumnsVerifier validation = new();
         action(validation);
         _rowValidations.Add(validation);
+        return this;
+    }
+
+    public IRowVerifier VerifyColumns(Action<IColumnValidation> action)
+    {
+        action(_columnValidation);
         return this;
     }
 }
