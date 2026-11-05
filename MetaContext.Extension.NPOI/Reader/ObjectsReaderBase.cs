@@ -141,7 +141,9 @@ public abstract class ObjectsReaderBase<TTargetObject> : IObjectsReader<TTargetO
 
     protected abstract void ColumnValidate(IColumnValidation validation);
 
-    protected abstract void ColumnsVerify(IColumnsVerifier columnsVerifier);
+    protected virtual void ColumnsVerify(IColumnsVerifier columnsVerifier)
+    { 
+    }
 
     protected abstract TTargetObject ReadTargetObject(IRowReader rowReader);
 
