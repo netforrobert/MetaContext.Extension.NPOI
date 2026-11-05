@@ -13,12 +13,13 @@ internal class ColumnValidation : IColumnValidation
         _readerErrorMessageProvider = readerErrorMessageProvider;
     }
 
-    public void ColVerify(string column, Action<IColVerifier> action, int index = 0)
+    public IColumnValidation ColVerify(string column, Action<IColVerifier> action, int index = 0)
     {
         var colKey = new ColKey(column, index);
         var verifier = new ColVerifier(_readerErrorMessageProvider, colKey);
         action(verifier);
         _colVerifiers.Add(verifier);
+        return this;
     }
 
     public IEnumerable<string> GetInvalidMessage(IRowReader rowReader)

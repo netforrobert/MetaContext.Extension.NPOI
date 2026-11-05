@@ -148,7 +148,7 @@ public abstract class ObjectsReader<TTargetObject> : IObjectsReader<TTargetObjec
     { 
     }
 
-    protected virtual void ColumnValidate(IColumnValidation columnValidation)
+    protected virtual void ColumnValidate(IColumnValidation validation)
     { 
     }
 
