@@ -13,6 +13,16 @@ internal class ColumnValidation : IColumnValidation
         _readerErrorMessageProvider = readerErrorMessageProvider;
     }
 
+    public IColumnValidation ColsVerify(Action<IColumnTaker> takerAction, Action<IColVerifier> action)
+    {
+        ColumnTaker taker = new();
+        takerAction(taker);
+        foreach (var colKey in taker.ColKeys)
+            ColVerify(colKey.Column, action, colKey.Index);
+
+        return this;
+    }
+
     public IColumnValidation ColVerify(string column, Action<IColVerifier> action, int index = 0)
     {
         var colKey = new ColKey(column, index);

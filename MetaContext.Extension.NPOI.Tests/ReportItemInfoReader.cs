@@ -19,10 +19,8 @@ public class ReportItemInfoReader(ISheet sheet, IEnumerable<HeaderInfo> headers)
 
         for (int i = 0; i < 4; i++)
         {
-            validation.ColsVerify(col 
-                => col.Verify(x => !decimal.TryParse(x, out _), arg => $"{arg.ColKey.Column} '{arg.Value}' 无效"), 
-                index: i,
-                "销售额", "利润");
+            validation.ColsVerify(t => t.Take("销售额", i).Take("利润", i),
+                col => col.Verify(x => !decimal.TryParse(x, out _), arg => $"{arg.ColKey.Column} '{arg.Value}' 无效"));
         }
 
         validation.ColVerify("备注", col => col.NotRequired());
