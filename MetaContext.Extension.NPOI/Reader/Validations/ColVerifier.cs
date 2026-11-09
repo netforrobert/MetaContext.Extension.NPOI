@@ -65,7 +65,7 @@ internal class ColVerifier : IColVerifier
                 return UseVerify(value, out errMessage);
             default: 
                 errMessage = null;
-                return true;
+                return false;
         }
     }
 
