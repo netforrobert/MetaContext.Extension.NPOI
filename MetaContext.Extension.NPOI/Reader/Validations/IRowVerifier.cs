@@ -6,8 +6,6 @@ namespace MetaContext.Extension.NPOI.Reader.Validations;
 
 public interface IRowVerifier
 {
-    IRowVerifier VerifyColumn(Action<IColumnVerifier> action);
-
     IRowVerifier VerifyColumns(Action<IColumnValidation> action);
 
     IRowVerifier VerifyRow(Action<IColumnsVerifier> action);
