@@ -14,8 +14,8 @@ public class ReportItemInfoReader(ISheet sheet, IEnumerable<HeaderInfo> headers)
     protected override void ColumnValidate(IColumnValidation validation)
     {
         validation.ColVerify("员工ID", col => col.Verify(x => x.Length > 50, args => $"员工ID：'{args.Value}' 长度超过了50"))
-            .ColVerify("部门", col => col.Verify(x => x != "销售部", args => $"部门 '{args.Value}' 无效"))
-            .ColVerify("入职日期", col => col.Verify(x => !DateTime.TryParse(x, out _), args => $"入职日期：'{args.Value}' 无效"));
+            .ColVerify("部门", col => col.Verify(x => x != "销售部", args => args.ErrorText("无效")))
+            .ColVerify("入职日期", col => col.Verify(x => !DateTime.TryParse(x, out _), args => args.ErrorText("无效")));
 
         for (int i = 0; i < 4; i++)
         {

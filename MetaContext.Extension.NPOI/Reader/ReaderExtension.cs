@@ -1,5 +1,7 @@
 ﻿using System;
 
+using MetaContext.Extension.NPOI.Reader.Validations;
+
 namespace MetaContext.Extension.NPOI.Reader;
 
 public static class ReaderExtension
@@ -44,4 +46,7 @@ public static class ReaderExtension
         string text = reader.Read(colKey.Column, colKey.Index);
         return text.ParseToValue<TValue>();
     }
+
+    public static string ErrorText(this ColValidationArguments args, string errMessage)
+        => $"{args.ColKey.Column} '{args.Value}' {errMessage}";
 }
