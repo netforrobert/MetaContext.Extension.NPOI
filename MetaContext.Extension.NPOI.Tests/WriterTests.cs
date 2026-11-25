@@ -24,11 +24,11 @@ public class WriterTests
     [Fact]
     public void Test_Write()
     {
-        //构建模拟数据
-        static IEnumerable<ReportItemInfo> GetReportItems()
-        {
-            Random rnd = new();
+        Random rnd = new();
 
+        //构建模拟数据
+        IEnumerable<ReportItemInfo> GetReportItems()
+        {
             IEnumerable<QuarterlyData> GetQuarterDatas()
             {
                 for (int i = 0; i < 4; i++)
@@ -62,6 +62,8 @@ public class WriterTests
             }
         };
 
+
+
         XSSFWorkbook sheets = new();
         sheets.CreateSheet()
             .UseSheetWriter()
@@ -84,10 +86,11 @@ public class WriterTests
                     {
                         var quarterlyData = quarterlyDatas[i];
                         setter.Set("销售额", quarterlyData.Amount, i)
-                        .Set("利润", quarterlyData.Profit, i);
+                        //为奇数的时候写入利润
+                        .Set("利润", quarterlyData.Profit, i, v => v % 2 == 1);
                     }
                 })
-                .Set("备注", x => x.Remark);
+                .Set("备注", x => x.Remark, sefIf: v => rnd.Next(0, 20) % 2 == 0);
             })
             .UseDefaultAutoWidthSize();
 

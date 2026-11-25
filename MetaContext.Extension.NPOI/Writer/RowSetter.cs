@@ -33,7 +33,10 @@ internal class RowSetter : IRowSetter
         return new CellWriter(_row, colIndex.ColumnIndex, Rows, cols);
     }
 
-    public IRowSetter Set<TargetValue>(string columnName, TargetValue value, int index)
+    public IRowSetter Set<TTargetValue>(string columnName,
+        TTargetValue value, 
+        int index,
+        Func<TTargetValue, bool> sefIf)
     {
         var colIndex = _colIndexs.GetColIndex(columnName, index) 
             ?? throw new InvalidOperationException($"列名 '{columnName}' 不存在");
@@ -48,8 +51,13 @@ internal class RowSetter : IRowSetter
             _row.Sheet.AddMergedRegion(region);
         }
 
-        var cell = _row.GetCell(colIndex.ColumnIndex) ?? _row.CreateCell(colIndex.ColumnIndex);
-        cell.SetTargetValue(value);
+        sefIf ??= x => true;
+        if (sefIf(value))
+        {
+            var cell = _row.GetCell(colIndex.ColumnIndex) ?? _row.CreateCell(colIndex.ColumnIndex);
+            cell.SetTargetValue(value);
+        }
+
         return this;
     }
 }

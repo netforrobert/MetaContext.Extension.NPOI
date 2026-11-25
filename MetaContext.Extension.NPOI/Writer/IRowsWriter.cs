@@ -20,11 +20,13 @@ public interface IRowsWriter<TData>
     IRowsWriter<TData> Set<TProperty, TTargetValue>(string headerName,
         Func<TData, TProperty> propertyFactory,
         Func<TProperty, TTargetValue> convertor = null,
-        int headerIndex = 0);
+        int headerIndex = 0,
+        Func<TTargetValue, bool> sefIf = null);
 
     IRowsWriter<TData> Set<TProperty>(string headerName,
         Func<TData, TProperty> propertyFactory,
-        int headerIndex = 0);
+        int headerIndex = 0,
+        Func<TProperty, bool> sefIf = null);
 
     IRowsWriter<TData> Populate(Action<IRowSetter, TData> extraAction);
 }
