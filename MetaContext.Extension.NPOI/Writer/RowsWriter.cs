@@ -38,7 +38,7 @@ internal class RowsWriter<TData> : IRowsWriter<TData>
         Func<TData, TProperty> propertyFactory,
         Func<TProperty, TTargetValue> convertor = null,
         int headerIndex = 0,
-        Func<TTargetValue, bool> sefIf = null)
+        Func<TTargetValue, bool> setIf = null)
     {
         static TTargetValue ConvertToTargetValue(TProperty property)
         {
@@ -50,15 +50,15 @@ internal class RowsWriter<TData> : IRowsWriter<TData>
 
         var value = propertyFactory(_sourceObject);
         convertor ??= ConvertToTargetValue;
-        _rowSetter.Set(headerName, convertor(value), headerIndex, sefIf);
+        _rowSetter.Set(headerName, convertor(value), headerIndex, setIf);
         return this;
     }
 
     public IRowsWriter<TData> Set<TProperty>(string headerName,
         Func<TData, TProperty> propertyFactory,
         int headerIndex = 0,
-        Func<TProperty, bool> sefIf = null)
-        => Set(headerName, propertyFactory, null, headerIndex, sefIf);
+        Func<TProperty, bool> setIf = null)
+        => Set(headerName, propertyFactory, null, headerIndex, setIf);
 
     public IRowsWriter<TData> SetItems<TItem>(Func<TData, IEnumerable<TItem>> itemsSelector,
         Func<TData, int> rowsSelector,

@@ -17,12 +17,12 @@ public interface IRowSetter
     /// <param name="columnName">列名</param>
     /// <param name="value"></param>
     /// <param name="index">下标。默认为0，用来处理同名列</param>
-    /// <param name="sefIf">为true执行set。默认为true</param>
+    /// <param name="setIf">为true执行set。默认为true</param>
     /// <returns></returns>
     IRowSetter Set<TTargetValue>(string columnName,
         TTargetValue value, 
         int index = 0, 
-        Func<TTargetValue, bool> sefIf = null);
+        Func<TTargetValue, bool> setIf = null);
 
     ICellWriter CreaterCellWriter(string columnName, int index = 0, int cols = 1);
 }

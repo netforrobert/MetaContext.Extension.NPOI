@@ -36,7 +36,7 @@ internal class RowSetter : IRowSetter
     public IRowSetter Set<TTargetValue>(string columnName,
         TTargetValue value, 
         int index,
-        Func<TTargetValue, bool> sefIf)
+        Func<TTargetValue, bool> setIf)
     {
         var colIndex = _colIndexs.GetColIndex(columnName, index) 
             ?? throw new InvalidOperationException($"列名 '{columnName}' 不存在");
@@ -51,8 +51,8 @@ internal class RowSetter : IRowSetter
             _row.Sheet.AddMergedRegion(region);
         }
 
-        sefIf ??= x => true;
-        if (sefIf(value))
+        setIf ??= x => true;
+        if (setIf(value))
         {
             var cell = _row.GetCell(colIndex.ColumnIndex) ?? _row.CreateCell(colIndex.ColumnIndex);
             cell.SetTargetValue(value);

@@ -90,7 +90,7 @@ public class WriterTests
                         .Set("利润", quarterlyData.Profit, i, v => v % 2 == 1);
                     }
                 })
-                .Set("备注", x => x.Remark, sefIf: v => rnd.Next(0, 20) % 2 == 0);
+                .Set("备注", x => x.Remark, setIf: v => rnd.Next(0, 20) % 2 == 0);
             })
             .UseDefaultAutoWidthSize();
 
