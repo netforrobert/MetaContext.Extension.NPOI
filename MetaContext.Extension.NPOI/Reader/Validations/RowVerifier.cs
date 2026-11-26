@@ -11,7 +11,7 @@ namespace MetaContext.Extension.NPOI.Reader.Validations;
 
 internal class RowVerifier : IRowVerifier
 {
-    private readonly List<ColumnsVerifier> _rowValidations = new();
+    private readonly List<RowValidation> _rowValidations = new();
     private readonly ColumnIndices _columnIndices;
     private readonly ColumnValidation _columnValidation;
 
@@ -44,9 +44,9 @@ internal class RowVerifier : IRowVerifier
         return new ErrowRowInfo(row.RowNum + 1, errorMessages, isBreakLoop);
     }
 
-    public IRowVerifier VerifyRow(Action<IColumnsVerifier> action)
+    public IRowVerifier VerifyRow(Action<IRowValidation> action)
     {
-        ColumnsVerifier validation = new();
+        RowValidation validation = new();
         action(validation);
         _rowValidations.Add(validation);
         return this;

@@ -26,11 +26,11 @@ public class ReportItemInfoReader(ISheet sheet, IEnumerable<HeaderInfo> headers)
         validation.ColVerify("备注", col => col.NotRequired());
     }
 
-    protected override void ColumnsVerify(IColumnsVerifier columnsVerifier)
+    protected override void RowValidate(IRowValidation validation)
     {
-        //多列校验
+        //行校验
         //校验销售额和利润大小
-        columnsVerifier.UseValuesVerify(rowReader =>
+        validation.Verify(rowReader =>
         {
             for (int i = 0; i < 4; i++)
             {
@@ -46,10 +46,10 @@ public class ReportItemInfoReader(ISheet sheet, IEnumerable<HeaderInfo> headers)
         (_, args) => args[0].ToString());
     }
 
-    protected override void TTargetObjectVerify(ITargetObjectVerifier<ReportItemInfo> objectVerifier)
+    protected override void TTargetObjectValidate(ITargetObjectValidation<ReportItemInfo> validation)
     {
         //对象校验，处理Id重复
-        objectVerifier.VerifyObject(obj =>
+        validation.Verify(obj =>
         {
             if (_employeeIds.Contains(obj.Id))
                 return new(true, $"员工ID '{obj.Id}' 出现重复");

@@ -42,7 +42,7 @@ internal class SheetReader : ISheetReader
     public ReadResult<TTargetObject> Read<TTargetObject>(Action<IRowReader<TTargetObject>> readerAction,
         int startRowIndex = 1, 
         int startColIndex = 0,
-        Action<ITargetObjectVerifier<TTargetObject>> objectVerify = null)
+        Action<ITargetObjectValidation<TTargetObject>> objectVerify = null)
         where TTargetObject : class, new()
     {
         var rowTReader = new RowReader<TTargetObject>();
@@ -55,7 +55,7 @@ internal class SheetReader : ISheetReader
     public ReadResult<TTargetObject> Read<TTargetObject>(Func<IRowReader, TTargetObject> targetFactory,
         int startRowIndex = 1, 
         int startColIndex = 0,
-        Action<ITargetObjectVerifier<TTargetObject>> objectVerify = null)
+        Action<ITargetObjectValidation<TTargetObject>> objectVerify = null)
     {
         //处理表头校验
         var headerRowIndices = _headers.Select(p => p.RowIndex).Distinct().OrderBy(p => p).ToArray();
@@ -94,7 +94,7 @@ internal class SheetReader : ISheetReader
         List<TTargetObject> targetObjects = new();
         int processedCount = 0;
         int successedCount = 0;
-        TargetObjectVerifier<TTargetObject> objectVerifier = new();
+        TargetObjectValidation<TTargetObject> objectVerifier = new();
         objectVerify?.Invoke(objectVerifier);
         for (int rowIndex = startRowIndex; rowIndex <= _sheet.LastRowNum; rowIndex++)
         {

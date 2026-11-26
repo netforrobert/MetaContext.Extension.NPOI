@@ -5,11 +5,11 @@ using System.Text;
 
 namespace MetaContext.Extension.NPOI.Reader.Validations;
 
-internal class ColumnsVerifier : IColumnsVerifier
+internal class RowValidation : IRowValidation
 {
     private readonly List<Tuple<Func<IRowReader, ValidationResult>, Func<IRowReader, object[], string>, bool>> _verifiers = new();
 
-    public void UseValuesVerify(Func<IRowReader, ValidationResult> verfierfunc,
+    public void Verify(Func<IRowReader, ValidationResult> verfierfunc,
         Func<IRowReader, object[], string> messageFactory,
         bool isBreakLoop)
     {

@@ -15,11 +15,11 @@ public interface ISheetReader
     ReadResult<TTargetObject> Read<TTargetObject>(Action<IRowReader<TTargetObject>> readerAction,
         int startRowIndex = 1,
         int startColIndex = 0,
-        Action<ITargetObjectVerifier<TTargetObject>> objectVerify = null)
+        Action<ITargetObjectValidation<TTargetObject>> objectVerify = null)
         where TTargetObject : class, new();
 
     ReadResult<TTargetObject> Read<TTargetObject>(Func<IRowReader, TTargetObject> targetFactory,
         int startRowIndex = 1,
         int startColIndex = 0,
-        Action<ITargetObjectVerifier<TTargetObject>> objectVerify = null);
+        Action<ITargetObjectValidation<TTargetObject>> objectVerify = null);
 }

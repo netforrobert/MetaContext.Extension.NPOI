@@ -11,7 +11,7 @@ public interface IObjectsReader<TTargetObject>
 {
     void UseRowValidations(Action<IRowVerifier> action);
 
-    void UseObjectValidations(Action<ITargetObjectVerifier<TTargetObject>> action);
+    void UseObjectValidations(Action<ITargetObjectValidation<TTargetObject>> action);
 
     ReadResult<TTargetObject> Read(Action<TTargetObject> extraAction = null,
         int startRowIndex = -1,

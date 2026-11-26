@@ -8,5 +8,5 @@ public interface IRowVerifier
 {
     IRowVerifier VerifyColumns(Action<IColumnValidation> action);
 
-    IRowVerifier VerifyRow(Action<IColumnsVerifier> action);
+    IRowVerifier VerifyRow(Action<IRowValidation> action);
 }

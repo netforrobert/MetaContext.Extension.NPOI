@@ -5,11 +5,11 @@ using Org.BouncyCastle.Crypto;
 
 namespace MetaContext.Extension.NPOI.Reader.Validations;
 
-internal class TargetObjectVerifier<TTargetObject> : ITargetObjectVerifier<TTargetObject>, IObjectVerifier
+internal class TargetObjectValidation<TTargetObject> : ITargetObjectValidation<TTargetObject>, IObjectVerifier
 {
     private readonly List<Tuple<Func<TTargetObject, ValidationResult>, Func<TTargetObject, object[], string>, bool>> _verifiers = new();
 
-    public ITargetObjectVerifier<TTargetObject> VerifyObject(Func<TTargetObject, ValidationResult> verifyFunc,
+    public ITargetObjectValidation<TTargetObject> Verify(Func<TTargetObject, ValidationResult> verifyFunc,
         Func<TTargetObject, object[], string> stringFactory,
         bool IsAbortReading)
     {

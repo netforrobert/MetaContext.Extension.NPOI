@@ -14,9 +14,9 @@ public abstract class ObjectsReaderBase<TTargetObject> : IObjectsReader<TTargetO
     where TTargetObject : class
 {
     private readonly ReaderErrorMessageProvider _errorMessageProvider = new();
-    private readonly TargetObjectVerifier<TTargetObject> _objectVerifier = new();
+    private readonly TargetObjectValidation<TTargetObject> _objectVerifier = new();
     private readonly List<Action<IRowVerifier>> _appendedRowValidations = new();
-    private readonly List<Action<ITargetObjectVerifier<TTargetObject>>> _appendedObjValidations = new();
+    private readonly List<Action<ITargetObjectValidation<TTargetObject>>> _appendedObjValidations = new();
 
     private readonly ISheet _sheet;
     private readonly IEnumerable<HeaderInfo> _headers;
@@ -39,11 +39,11 @@ public abstract class ObjectsReaderBase<TTargetObject> : IObjectsReader<TTargetO
         int startColIndex = 0)
     {
         _rowVerifier.VerifyColumns(ColumnValidate);
-        _rowVerifier.VerifyRow(ColumnsVerify);
+        _rowVerifier.VerifyRow(RowValidate);
         foreach (var action in _appendedRowValidations)
             action(_rowVerifier);
 
-        TTargetObjectVerify(_objectVerifier);
+        TTargetObjectValidate(_objectVerifier);
         foreach (var action in _appendedObjValidations)
             action(_objectVerifier);
 
@@ -133,7 +133,7 @@ public abstract class ObjectsReaderBase<TTargetObject> : IObjectsReader<TTargetO
             errowRowInfos);
     }
 
-    public void UseObjectValidations(Action<ITargetObjectVerifier<TTargetObject>> action)
+    public void UseObjectValidations(Action<ITargetObjectValidation<TTargetObject>> action)
         => _appendedObjValidations.Add(action);
 
     public void UseRowValidations(Action<IRowVerifier> action)
@@ -141,13 +141,13 @@ public abstract class ObjectsReaderBase<TTargetObject> : IObjectsReader<TTargetO
 
     protected abstract void ColumnValidate(IColumnValidation validation);
 
-    protected virtual void ColumnsVerify(IColumnsVerifier columnsVerifier)
+    protected virtual void RowValidate(IRowValidation validation)
     { 
     }
 
     protected abstract TTargetObject ReadTargetObject(IRowReader rowReader);
 
-    protected virtual void TTargetObjectVerify(ITargetObjectVerifier<TTargetObject> objectVerifier)
+    protected virtual void TTargetObjectValidate(ITargetObjectValidation<TTargetObject> objectValidation)
     {
     }
 
